@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import ModeSelect from "./components/ModeSelect";
+import LetterSelect from "./components/LetterSelect";
+import BrailleInput from "./components/BrailleInput";
+import Feedback from "./components/Feedback";
+import { brailleMap, type BrailleDot } from "./braille";
 
-function App() {
-  const [count, setCount] = useState(0)
+export type Mode = "letter" | "word" | "dot";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export interface FeedbackResult {
+  correct: boolean;
+  correctDots: BrailleDot[];
 }
 
-export default App
+export default function App() {
+  const [mode, setMode] = useState<Mode | null>(null);
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [dotsPressed, setDotsPressed] = useState<BrailleDot[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackResult | null>(null);
+
+  const reset = () => {
+    setSelectedLetter(null);
+    setDotsPressed([]);
+    setFeedback(null);
+  };
+
+  const verifyDots = () => {
+    if (!selectedLetter) return;
+
+    const correctDots = brailleMap[selectedLetter];
+    const isCorrect =
+      correctDots.length === dotsPressed.length &&
+      correctDots.every((d) => dotsPressed.includes(d));
+
+    setFeedback({
+      correct: isCorrect,
+      correctDots,
+    });
+  };
+
+  return (
+    <div style={{ padding: 40 }}>
+      {!mode && <ModeSelect onSelect={setMode} />}
+      {mode && !selectedLetter && <LetterSelect onSelect={setSelectedLetter} />}
+      {mode && selectedLetter && !feedback && (
+        <BrailleInput
+          selectedLetter={selectedLetter}
+          dotsPressed={dotsPressed}
+          setDotsPressed={setDotsPressed}
+          onSubmit={verifyDots}
+        />
+      )}
+      {feedback && (
+        <Feedback
+          feedback={feedback}
+          selectedLetter={selectedLetter!}
+          reset={reset}
+        />
+      )}
+    </div>
+  );
+}
