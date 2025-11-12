@@ -18,10 +18,13 @@ export default function App() {
   const [dotsPressed, setDotsPressed] = useState<BrailleDot[]>([]);
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null);
 
+  const defaultMode: Mode = "letter"; // Set defaultMode to a valid Mode type
+
   const reset = () => {
     setSelectedLetter(null);
     setDotsPressed([]);
     setFeedback(null);
+    setMode(null); // Reset mode when resetting
   };
 
   const verifyDots = () => {
@@ -40,11 +43,15 @@ export default function App() {
 
   return (
     <div style={{ padding: 40 }}>
-      {!mode && <ModeSelect onSelect={setMode} />}
-      {mode && !selectedLetter && <LetterSelect onSelect={setSelectedLetter} />}
-      {mode && selectedLetter && !feedback && (
+      {!mode && <ModeSelect mode={defaultMode} onSelect={setMode} />}
+      {mode && <ModeSelect mode={mode} onSelect={setMode} />}
+      {mode === "letter" && !selectedLetter && (
+        <LetterSelect onSelect={setSelectedLetter} />
+      )}
+      {mode === "letter" && selectedLetter && !feedback && (
         <BrailleInput
-          selectedLetter={selectedLetter}
+          mode={mode} // Added mode prop
+          selectedLetter={selectedLetter || ""} // Handle null case
           dotsPressed={dotsPressed}
           setDotsPressed={setDotsPressed}
           onSubmit={verifyDots}
@@ -53,8 +60,9 @@ export default function App() {
       {feedback && (
         <Feedback
           feedback={feedback}
-          selectedLetter={selectedLetter!}
+          selectedLetter={selectedLetter || ""} // Handle null case
           reset={reset}
+          selectedMode={mode || ""} // Handle null case
         />
       )}
     </div>

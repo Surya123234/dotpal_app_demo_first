@@ -4,22 +4,23 @@ import type { FeedbackResult } from "../App";
 interface Props {
   feedback: FeedbackResult;
   selectedLetter: string;
+  selectedMode: string;
   reset: () => void;
 }
 
-export default function Feedback({ feedback, selectedLetter, reset }: Props) {
+export default function Feedback({
+  feedback,
+  selectedLetter,
+  selectedMode,
+  reset,
+}: Props) {
   useEffect(() => {
-    if (feedback.correct) {
-      const audio = new Audio("/audios/yay.mp3");
-      audio.play().catch(() => {
-        /* ignore play errors (autoplay policy, etc.) */
-      });
-    } else {
-      const audio = new Audio("/audios/wrong.mp3");
-      audio.play().catch(() => {
-        /* ignore play errors (autoplay policy, etc.) */
-      });
-    }
+    const audio = new Audio(
+      feedback.correct ? "/audios/yay.mp3" : "/audios/wrong.mp3"
+    );
+    audio.play().catch(() => {
+      /* ignore play errors (autoplay policy, etc.) */
+    });
   }, [feedback.correct]);
 
   return (
@@ -27,7 +28,14 @@ export default function Feedback({ feedback, selectedLetter, reset }: Props) {
       {feedback.correct ? (
         <>
           <h2>✅ Correct!</h2>
-          <button onClick={reset}>Next Letter</button>
+          <button onClick={reset}>
+            Next{" "}
+            {selectedMode === "letter"
+              ? "Letter"
+              : selectedMode === "word"
+              ? "Word"
+              : "Dot"}
+          </button>
         </>
       ) : (
         <>

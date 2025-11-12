@@ -10,6 +10,7 @@ export default function LetterSelect({ onSelect }: Props) {
       const key = e.key.toLowerCase();
       if (key >= "a" && key <= "z") {
         onSelect(key);
+        
       }
     }
 
