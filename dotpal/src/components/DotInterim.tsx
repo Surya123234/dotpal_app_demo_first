@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { type BrailleDot, brailleMap } from "../braille";
 import "../styles/BrailleCell.css";
 
@@ -17,6 +18,12 @@ const dotPositions: Record<BrailleDot, { row: number; col: number }> = {
 };
 
 export default function DotInterim({ selectedLetter, onConfirm }: Props) {
+  useEffect(() => {
+    const audio = new Audio(`/audios/A_dot1.mp3`);
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
+  }, [selectedLetter]);
   const correctDots = brailleMap[selectedLetter] || [];
   const dots: BrailleDot[] = [1, 2, 3, 4, 5, 6];
 
