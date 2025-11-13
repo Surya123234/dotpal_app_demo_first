@@ -1,21 +1,11 @@
 import { useEffect } from "react";
-import { type BrailleDot, brailleMap } from "../braille";
-import "../styles/BrailleCell.css";
+import { brailleMap } from "../braille";
+import BrailleCell from "./BrailleCell";
 
 interface Props {
   selectedLetter: string;
   onConfirm: () => void;
 }
-
-// Map dot number to position (row, col) in 3x2 matrix
-const dotPositions: Record<BrailleDot, { row: number; col: number }> = {
-  1: { row: 0, col: 0 },
-  2: { row: 1, col: 0 },
-  3: { row: 2, col: 0 },
-  4: { row: 0, col: 1 },
-  5: { row: 1, col: 1 },
-  6: { row: 2, col: 1 },
-};
 
 export default function DotInterim({ selectedLetter, onConfirm }: Props) {
   useEffect(() => {
@@ -24,8 +14,8 @@ export default function DotInterim({ selectedLetter, onConfirm }: Props) {
       /* ignore play errors */
     });
   }, [selectedLetter]);
+
   const correctDots = brailleMap[selectedLetter] || [];
-  const dots: BrailleDot[] = [1, 2, 3, 4, 5, 6];
 
   return (
     <div
@@ -57,27 +47,7 @@ export default function DotInterim({ selectedLetter, onConfirm }: Props) {
           {selectedLetter.toUpperCase()}
         </span>
       </h2>
-      <div className="braille-cell">
-        {dots.map((dot) => {
-          const pos = dotPositions[dot];
-          const isCorrect = correctDots.includes(dot);
-
-          return (
-            <div
-              key={dot}
-              className={`dot ${isCorrect ? "pressed" : ""}`}
-              style={{
-                gridRow: pos.row + 1,
-                gridColumn: pos.col + 1,
-                cursor: "default",
-                pointerEvents: "none",
-              }}
-            >
-              <span className="dot-number">{dot}</span>
-            </div>
-          );
-        })}
-      </div>
+      <BrailleCell selectedLetter={selectedLetter} correctDots={correctDots} />
       <button
         onClick={onConfirm}
         style={{

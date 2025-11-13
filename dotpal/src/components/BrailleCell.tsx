@@ -2,9 +2,10 @@ import { type BrailleDot } from "../braille";
 import "../styles/BrailleCell.css";
 
 interface Props {
-  dotsPressed: BrailleDot[];
-  onDotToggle: (dot: BrailleDot) => void;
   selectedLetter: string;
+  dotsPressed?: BrailleDot[];
+  onDotToggle?: (dot: BrailleDot) => void;
+  correctDots?: BrailleDot[];
 }
 
 // Map dot number to position (row, col) in 3x2 matrix
@@ -29,11 +30,14 @@ const dotToKey: Record<BrailleDot, string> = {
 };
 
 export default function BrailleCell({
-  dotsPressed,
-  onDotToggle,
   selectedLetter,
+  dotsPressed = [],
+  onDotToggle,
+  correctDots = [],
 }: Props) {
   const dots: BrailleDot[] = [1, 2, 3, 4, 5, 6];
+  const isReadOnly = !onDotToggle;
+  const activeDots = isReadOnly ? correctDots : dotsPressed;
 
   return (
     <div className="braille-cell-container">
@@ -41,29 +45,34 @@ export default function BrailleCell({
       <div className="braille-cell">
         {dots.map((dot) => {
           const pos = dotPositions[dot];
-          const isPressed = dotsPressed.includes(dot);
+          const isActive = activeDots.includes(dot);
           const key = dotToKey[dot];
 
           return (
             <div
               key={dot}
-              className={`dot ${isPressed ? "pressed" : ""}`}
+              className={`dot ${isActive ? "pressed" : ""}`}
               style={{
                 gridRow: pos.row + 1,
                 gridColumn: pos.col + 1,
+                ...(isReadOnly
+                  ? { cursor: "default", pointerEvents: "none" }
+                  : {}),
               }}
-              onClick={() => onDotToggle(dot)}
-              title={`Dot ${dot} (Press '${key}')`}
+              onClick={() => !isReadOnly && onDotToggle?.(dot)}
+              title={isReadOnly ? `Dot ${dot}` : `Dot ${dot} (Press '${key}')`}
             >
               <span className="dot-number">{dot}</span>
-              <span className="key-label">{key}</span>
+              {!isReadOnly && <span className="key-label">{key}</span>}
             </div>
           );
         })}
       </div>
-      <p className="dots-info">
-        Dots pressed: {dotsPressed.join(", ") || "none"}
-      </p>
+      {!isReadOnly && (
+        <p className="dots-info">
+          Dots pressed: {dotsPressed.join(", ") || "none"}
+        </p>
+      )}
     </div>
   );
 }
