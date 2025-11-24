@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Arduino from "./components/arduino";
 import ModeSelect from "./components/ModeSelect";
 import LetterSelect from "./components/LetterSelect";
 import BrailleInput from "./components/BrailleInput";
@@ -16,6 +17,7 @@ export interface FeedbackResult {
 }
 
 export default function App() {
+  return <Arduino />;
   const [mode, setMode] = useState<Mode | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [dotsPressed, setDotsPressed] = useState<BrailleDot[]>([]);
