@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { type BrailleDot, keyToDot } from "../braille";
+import { type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
 
 interface Props {
@@ -8,7 +7,6 @@ interface Props {
   setDotsPressed: (dots: BrailleDot[]) => void;
   onSubmit: () => void;
   onBack: () => void;
-  mode: "letter" | "word" | "dot";
 }
 
 export default function BrailleInput({
@@ -17,7 +15,6 @@ export default function BrailleInput({
   setDotsPressed,
   onSubmit,
   onBack,
-  mode,
 }: Props) {
   const toggleDot = (dot: BrailleDot) => {
     if (dotsPressed.includes(dot)) {
@@ -31,23 +28,6 @@ export default function BrailleInput({
       /* ignore play errors (autoplay policy, etc.) */
     });
   };
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      const dot = keyToDot[e.key];
-
-      if (dot) {
-        toggleDot(dot);
-      }
-
-      if (e.key === "Enter") {
-        onSubmit();
-      }
-    }
-
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [dotsPressed, setDotsPressed, onSubmit, mode]);
 
   return (
     <div
