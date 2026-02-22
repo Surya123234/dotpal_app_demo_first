@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { ArduinoDriver, type ArduinoInputEvent } from "../arduino-driver";
 import ModeSelect from "./ModeSelect";
 import LetterSelect from "./LetterSelect";
 import BrailleInput from "./BrailleInput";
@@ -23,8 +24,9 @@ export default function Arduino() {
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null);
   const [showInterimScreen, setShowInterimScreen] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState(false);
+  const driverRef = useRef<ArduinoDriver | null>(null);
 
-  // Ref to store current state for use in the serial reading loop
+  // Ref to store current state for use in the input handler
   const stateRef = useRef({
     mode,
     selectedLetter,
@@ -32,8 +34,6 @@ export default function Arduino() {
     feedback,
     dotsPressed,
   });
-
-  // Update the ref whenever state changes
   useEffect(() => {
     stateRef.current = {
       mode,
@@ -72,68 +72,61 @@ export default function Arduino() {
     });
   };
 
-  const handleArduinoInput = (
-    input: string,
-    currentMode: Mode | null,
-    currentSelectedLetter: string | null,
-    currentShowInterimScreen: boolean,
-    currentFeedback: FeedbackResult | null,
-    currentDotsPressed: BrailleDot[]
-  ) => {
-    const trimmed = input.trim().toUpperCase();
-    console.log("Arduino input received:", { raw: input, trimmed });
+  // Handles input events from ArduinoDriver and applies application business logic
+  const handleArduinoInput = (event: ArduinoInputEvent) => {
+    const {
+      mode: currentMode,
+      selectedLetter: currentSelectedLetter,
+      showInterimScreen: currentShowInterimScreen,
+      feedback: currentFeedback,
+      dotsPressed: currentDotsPressed,
+    } = stateRef.current;
 
-    // Handle letter selection (A-Z)
-    if (trimmed.length === 1 && /^[A-Z]$/.test(trimmed)) {
-      console.log("Letter selection matched:", trimmed);
+    console.log("Arduino event received:", event);
+
+    // Handle letter selection
+    if (event.type === "letter") {
       if (currentMode && !currentSelectedLetter) {
-        // We're waiting for letter selection
-        setSelectedLetter(trimmed);
+        setSelectedLetter(event.value);
         setShowInterimScreen(true);
       }
       return;
     }
 
-    // Handle braille dot state changes (UP/DOWN for dot 1)
-    if (trimmed === "UP") {
-      console.log("UP matched");
+    // Handle dot press/release
+    if (event.type === "dot") {
       if (
         currentMode &&
         currentSelectedLetter &&
         !currentShowInterimScreen &&
         !currentFeedback
       ) {
-        // Select dot 1
-        setDotsPressed((prev) => (prev.includes(1) ? prev : [...prev, 1]));
+        const dot = event.dot as BrailleDot;
+        if (event.pressed) {
+          // Dot pressed
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev : [...prev, dot],
+          );
+        } else {
+          // Dot released
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev.filter((d) => d !== dot) : prev,
+          );
+        }
       }
       return;
     }
 
-    if (trimmed === "DOWN") {
-      console.log("DOWN matched");
-      if (
-        currentMode &&
-        currentSelectedLetter &&
-        !currentShowInterimScreen &&
-        !currentFeedback
-      ) {
-        // Deselect dot 1
-        setDotsPressed((prev) =>
-          prev.includes(1) ? prev.filter((d) => d !== 1) : prev
-        );
-      }
-      return;
-    }
-
-    // Handle Submit button (used for interim screen confirmation or braille input submission)
-    if (trimmed === "SUBMIT") {
-      console.log("SUBMIT matched. States:", {
+    // Handle submit button
+    if (event.type === "submit") {
+      console.log("SUBMIT event. States:", {
         currentMode,
         currentSelectedLetter,
         currentShowInterimScreen,
         currentFeedback,
       });
-      // If we're on an interim screen, confirm it
+
+      // If on interim screen, confirm it
       if (
         currentMode &&
         currentSelectedLetter &&
@@ -145,7 +138,7 @@ export default function Arduino() {
         return;
       }
 
-      // If we're on braille input screen, verify the dots
+      // If on braille input screen, verify the dots
       if (
         currentMode &&
         currentSelectedLetter &&
@@ -153,12 +146,11 @@ export default function Arduino() {
         !currentFeedback
       ) {
         console.log("Verifying dots");
-        // Verify dots inline
         const correctDots = brailleMap[currentSelectedLetter.toLowerCase()];
         if (!correctDots) {
           console.error(
             "Letter not found in brailleMap:",
-            currentSelectedLetter
+            currentSelectedLetter,
           );
           return;
         }
@@ -190,80 +182,46 @@ export default function Arduino() {
     setMode(newMode);
   };
 
-  async function connectSerial() {
+  // Connect using ArduinoDriver
+  const connectSerial = async () => {
+    if (!driverRef.current) {
+      driverRef.current = new ArduinoDriver({
+        onInput: (event) => {
+          // Display raw input for debugging
+          if (event.type === "raw") {
+            setData(event.value);
+          } else {
+            setData(
+              event.type === "letter"
+                ? `Letter: ${event.value}`
+                : event.type === "dot"
+                  ? `Dot ${event.dot}: ${event.pressed ? "pressed" : "released"}`
+                  : "SUBMIT",
+            );
+          }
+          // Apply business logic to the parsed event
+          handleArduinoInput(event);
+        },
+        onConnect: () => setIsConnected(true),
+        onDisconnect: () => setIsConnected(false),
+        baudRate: 9600,
+      });
+    }
     try {
-      const port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 9600 });
-      setIsConnected(true);
-
-      const reader = port.readable.getReader();
-      const decoder = new TextDecoder();
-      let buffer = ""; // Buffer for incomplete messages
-
-      // Start reading loop
-      (async () => {
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-              setIsConnected(false);
-              reader.releaseLock();
-              break;
-            }
-
-            if (!value) continue; // Skip empty chunks
-
-            const text = decoder.decode(value);
-            buffer += text;
-
-            // Replace \r\n and \r with \n for consistent line splitting
-            buffer = buffer.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-            // Split by newlines and process each complete line
-            const lines = buffer.split("\n");
-
-            // Keep the last incomplete line in the buffer
-            buffer = lines[lines.length - 1];
-
-            // Process all complete lines
-            for (let i = 0; i < lines.length - 1; i++) {
-              const trimmed = lines[i].trim();
-              if (!trimmed) continue; // Skip empty lines
-
-              // Update display
-              setData(trimmed);
-
-              // Process the input with current state from ref
-              const currentState = stateRef.current;
-              try {
-                handleArduinoInput(
-                  trimmed,
-                  currentState.mode,
-                  currentState.selectedLetter,
-                  currentState.showInterimScreen,
-                  currentState.feedback,
-                  currentState.dotsPressed
-                );
-              } catch (inputError) {
-                console.error("Error processing Arduino input:", inputError);
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Serial read error:", error);
-          setIsConnected(false);
-          try {
-            reader.releaseLock();
-          } catch (e) {
-            // Already released
-          }
-        }
-      })();
-    } catch (error) {
-      console.error("Serial connection error:", error);
+      await driverRef.current.connect();
+    } catch (e) {
       setIsConnected(false);
     }
-  }
+  };
+
+  // Disconnect on unmount
+  useEffect(() => {
+    return () => {
+      if (driverRef.current) {
+        driverRef.current.disconnect();
+      }
+    };
+  }, []);
 
   return (
     <div
