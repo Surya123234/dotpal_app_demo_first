@@ -28,12 +28,3 @@ export const brailleMap: Record<string, BrailleDot[]> = {
   y: [1, 3, 4, 5, 6],
   z: [1, 3, 5, 6],
 };
-
-export const keyToDot: Record<string, BrailleDot> = {
-  "[": 1,
-  ";": 2,
-  ".": 3,
-  "]": 4,
-  "'": 5,
-  "/": 6,
-};

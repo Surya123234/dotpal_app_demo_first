@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { FeedbackResult } from "../App";
+import type { FeedbackResult } from "./arduino";
 
 interface Props {
   feedback: FeedbackResult;
