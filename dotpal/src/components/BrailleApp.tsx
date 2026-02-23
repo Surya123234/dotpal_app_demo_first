@@ -6,7 +6,13 @@ import BrailleInput from "./BrailleInput";
 import Feedback from "./Feedback";
 import Interim from "./Interim";
 import { brailleMap, type BrailleDot } from "../braille";
-import { colorSchemes, boxStyles, spacing, typography, buttonStyles } from "../styles/theme";
+import {
+  colorSchemes,
+  boxStyles,
+  spacing,
+  typography,
+  buttonStyles,
+} from "../styles/theme";
 
 export type Mode = "letter" | "word" | "dot";
 
