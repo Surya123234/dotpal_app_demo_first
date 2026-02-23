@@ -1,34 +1,6 @@
-import { useEffect } from "react";
+interface Props {}
 
-interface Props {
-  onSelect: (letter: string) => void;
-}
-
-export default function LetterSelect({ onSelect }: Props) {
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      const key = e.key.toLowerCase();
-      // Only allow single letter keys (a-z)
-      if (key.length === 1 && key >= "a" && key <= "z") {
-        e.preventDefault();
-        e.stopPropagation();
-        onSelect(key);
-      } else if (
-        key.length === 1 ||
-        key === "Tab" ||
-        key === "Enter" ||
-        key === " "
-      ) {
-        // Block other single keys and system keys
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
-
-    window.addEventListener("keydown", handleKey, true);
-    return () => window.removeEventListener("keydown", handleKey, true);
-  }, [onSelect]);
-
+export default function LetterSelect({}: Props) {
   return (
     <div
       style={{
@@ -46,9 +18,11 @@ export default function LetterSelect({ onSelect }: Props) {
       }}
     >
       <h2 style={{ fontSize: "1.5rem", color: "#333", margin: 0 }}>
-        🎹 Press a Letter
+        📚 Select a Letter
       </h2>
-      <p style={{ fontSize: "0.95rem", color: "#666", margin: 0 }}>(A–Z)</p>
+      <p style={{ fontSize: "0.95rem", color: "#666", margin: 0 }}>
+        (Using Arduino Input)
+      </p>
     </div>
   );
 }

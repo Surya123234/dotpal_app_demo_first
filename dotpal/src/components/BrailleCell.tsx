@@ -19,16 +19,6 @@ const dotPositions: Record<BrailleDot, { row: number; col: number }> = {
   6: { row: 2, col: 1 },
 };
 
-// Reverse mapping to find which key produces each dot
-const dotToKey: Record<BrailleDot, string> = {
-  1: "[",
-  2: ";",
-  3: ".",
-  4: "]",
-  5: "'",
-  6: "/",
-};
-
 export default function BrailleCell({
   selectedLetter,
   dotsPressed = [],
@@ -46,7 +36,6 @@ export default function BrailleCell({
         {dots.map((dot) => {
           const pos = dotPositions[dot];
           const isActive = activeDots.includes(dot);
-          const key = dotToKey[dot];
 
           return (
             <div
@@ -60,10 +49,9 @@ export default function BrailleCell({
                   : {}),
               }}
               onClick={() => !isReadOnly && onDotToggle?.(dot)}
-              title={isReadOnly ? `Dot ${dot}` : `Dot ${dot} (Press '${key}')`}
+              title={`Dot ${dot}`}
             >
               <span className="dot-number">{dot}</span>
-              {!isReadOnly && <span className="key-label">{key}</span>}
             </div>
           );
         })}
