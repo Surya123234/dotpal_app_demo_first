@@ -6,7 +6,7 @@ import BrailleInput from "./BrailleInput";
 import Feedback from "./Feedback";
 import Interim from "./Interim";
 import { brailleMap, type BrailleDot } from "../braille";
-import { colorSchemes, boxStyles, spacing, typography } from "../styles/theme";
+import { colorSchemes, boxStyles, spacing, typography, buttonStyles } from "../styles/theme";
 
 export type Mode = "letter" | "word" | "dot";
 
@@ -167,7 +167,7 @@ export default function BrailleApp() {
     setMode(newMode);
   };
 
-  // Initialize driver on mount
+  // Initialize driver on mount and auto-connect; keep connection until unplugged
   useEffect(() => {
     const driver = new ArduinoDriver({
       onInput: handleArduinoInput,
@@ -177,15 +177,18 @@ export default function BrailleApp() {
     });
     driverRef.current = driver;
 
-    // Connect immediately
+    // Attempt to auto-connect; if permissions are needed the browser will prompt
     driver.connect().catch(() => {
-      console.error("Failed to connect to Arduino");
+      /* ignore connection errors for now */
     });
 
-    return () => {
-      driver.disconnect();
-    };
+    // Intentionally do not call disconnect on unmount. Keep the port open until
+    // the device is unplugged so the driver maintains a persistent connection.
   }, []);
+  const goHome = () => {
+    // Reset UI state but keep the Arduino driver connection alive
+    reset();
+  };
 
   return (
     <div
@@ -231,6 +234,12 @@ export default function BrailleApp() {
 
         {!mode && <ModeSelect mode={defaultMode} onSelect={handleModeSelect} />}
         {mode && <ModeSelect mode={mode} onSelect={handleModeSelect} />}
+
+        <div style={{ marginTop: spacing.md }}>
+          <button onClick={goHome} style={buttonStyles.secondary}>
+            Home / Restart
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
