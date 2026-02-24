@@ -32,11 +32,12 @@ export default function Interim({ mode, selectedLetter }: Props) {
         background: "#ffffff",
         borderRadius: "0px",
         boxShadow: "0 0 0 2px #000000",
-        maxWidth: "clamp(600px, 95vw, 900px)",
+        maxWidth: "100%",
         width: "100%",
         height: "fit-content",
-        maxHeight: "85vh",
+        maxHeight: "90vh",
         overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
       {/* Letter display */}
@@ -47,7 +48,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
               ? "clamp(2rem, 5vw, 3rem)"
               : mode === "word"
                 ? "clamp(2.5rem, 6vw, 4rem)"
-                : "clamp(4rem, 10vw, 6rem)",
+                : "clamp(5rem, 14vw, 8rem)",
           fontWeight: "900",
           color: "#000000",
           textShadow: "none",
@@ -67,6 +68,8 @@ export default function Interim({ mode, selectedLetter }: Props) {
             alignItems: "center",
             gap: spacing.sm,
             width: "100%",
+            flex: 1,
+            justifyContent: "center",
           }}
         >
           <h2
@@ -90,7 +93,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
               {selectedLetter.toUpperCase()}
             </span>
           </h2>
-          <div style={{ width: "100%", maxHeight: "45vh", overflow: "auto" }}>
+          <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={correctDots as BrailleDot[]}
@@ -106,7 +109,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
             overflow: "hidden",
             boxShadow: "0 0 0 2px #000000",
             width: "100%",
-            maxWidth: "clamp(350px, 80vw, 550px)",
+            maxWidth: "100%",
             border: "3px solid #000000",
           }}
         >

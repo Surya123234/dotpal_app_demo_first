@@ -8,6 +8,8 @@ interface Props {
   selectedLetter: string;
   selectedMode: string;
   reset: () => void;
+  onTryAgain: () => void;
+  onNext: () => void;
 }
 
 export default function Feedback({
@@ -15,6 +17,8 @@ export default function Feedback({
   selectedLetter,
   selectedMode,
   reset,
+  onTryAgain,
+  onNext,
 }: Props) {
   useEffect(() => {
     const audio = new Audio(
@@ -42,7 +46,7 @@ export default function Feedback({
             Great job! You got it right!
           </p>
           <button
-            onClick={reset}
+            onClick={onNext}
             style={buttonStyles.primary()}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translate(-2px, -2px)";
@@ -82,7 +86,7 @@ export default function Feedback({
             />
           </div>
           <button
-            onClick={reset}
+            onClick={onTryAgain}
             style={buttonStyles.primary()}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translate(-2px, -2px)";

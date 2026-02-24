@@ -51,6 +51,25 @@ export default function BrailleApp() {
 
   const defaultMode: Mode = "letter";
 
+  const getRandomLetter = (): string => {
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    return letters[Math.floor(Math.random() * letters.length)];
+  };
+
+  const selectRandomLetter = () => {
+    const newLetter = getRandomLetter();
+    setSelectedLetter(newLetter);
+    setDotsPressed([]);
+    setFeedback(null);
+    setShowInterimScreen(true);
+  };
+
+  const tryAgain = () => {
+    setDotsPressed([]);
+    setFeedback(null);
+    setShowInterimScreen(false);
+  };
+
   const reset = () => {
     setSelectedLetter(null);
     setDotsPressed([]);
@@ -251,7 +270,7 @@ export default function BrailleApp() {
             e.currentTarget.style.transform = "translateY(0)";
           }}
         >
-          {isConnected ? "✓ Arduino" : "Connect Arduino"}
+          {isConnected ? "✓ DotPal Connected" : "Connect DotPal"}
         </button>
       </div>
 
@@ -401,7 +420,7 @@ export default function BrailleApp() {
                   fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
                 }}
               >
-                Waiting for Arduino letter input...
+                Waiting for letter selection...
               </p>
             </div>
           )}
@@ -438,6 +457,8 @@ export default function BrailleApp() {
               feedback={feedback}
               selectedLetter={selectedLetter || ""}
               reset={reset}
+              onTryAgain={tryAgain}
+              onNext={selectRandomLetter}
               selectedMode={mode || ""}
             />
           )}

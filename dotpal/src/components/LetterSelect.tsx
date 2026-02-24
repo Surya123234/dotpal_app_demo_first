@@ -26,7 +26,7 @@ export default function LetterSelect({}: Props) {
           fontWeight: "bold",
         }}
       >
-        📚 Select a Letter
+        Select a letter using DotPal
       </h2>
       <p
         style={{
@@ -35,9 +35,7 @@ export default function LetterSelect({}: Props) {
           margin: 0,
           fontWeight: "bold",
         }}
-      >
-        (Using Arduino Input)
-      </p>
+      ></p>
     </div>
   );
 }
