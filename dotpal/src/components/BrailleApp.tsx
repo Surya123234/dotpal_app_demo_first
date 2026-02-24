@@ -49,14 +49,28 @@ export default function BrailleApp() {
     };
   }, [mode, selectedLetter, showInterimScreen, feedback, dotsPressed]);
 
-  const defaultMode: Mode = "letter";
-
+  // Reset everything and go back to home
   const reset = () => {
     setSelectedLetter(null);
     setDotsPressed([]);
     setFeedback(null);
     setShowInterimScreen(false);
     setMode(null);
+  };
+
+  // Try the current letter again (reset dots and feedback, keep letter and mode)
+  const tryAgain = () => {
+    setDotsPressed([]);
+    setFeedback(null);
+    setShowInterimScreen(false);
+  };
+
+  // Move to next letter (reset letter, dots, and feedback, but keep mode)
+  const nextItem = () => {
+    setSelectedLetter(null);
+    setDotsPressed([]);
+    setFeedback(null);
+    setShowInterimScreen(false);
   };
 
   const verifyDots = () => {
@@ -258,8 +272,7 @@ export default function BrailleApp() {
           </div>
         )}
 
-        {!mode && <ModeSelect mode={defaultMode} onSelect={handleModeSelect} />}
-        {mode && <ModeSelect mode={mode} onSelect={handleModeSelect} />}
+        <ModeSelect selectedMode={mode || undefined} onSelect={handleModeSelect} />
 
         <div style={{ marginTop: spacing.md }}>
           <button onClick={goHome} style={buttonStyles.secondary}>
@@ -333,7 +346,8 @@ export default function BrailleApp() {
           <Feedback
             feedback={feedback}
             selectedLetter={selectedLetter || ""}
-            reset={reset}
+            tryAgain={tryAgain}
+            nextItem={nextItem}
             selectedMode={mode || ""}
           />
         )}

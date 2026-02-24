@@ -1,19 +1,22 @@
 import { useEffect } from "react";
 import type { FeedbackResult } from "./BrailleApp";
+import BrailleCell from "./BrailleCell";
 import { boxStyles, buttonStyles, typography } from "../styles/theme";
 
 interface Props {
   feedback: FeedbackResult;
   selectedLetter: string;
   selectedMode: string;
-  reset: () => void;
+  tryAgain: () => void;
+  nextItem: () => void;
 }
 
 export default function Feedback({
   feedback,
   selectedLetter,
   selectedMode,
-  reset,
+  tryAgain,
+  nextItem,
 }: Props) {
   useEffect(() => {
     const audio = new Audio(
@@ -38,7 +41,7 @@ export default function Feedback({
           </h2>
           <p style={typography.label}>Great job! You got it right!</p>
           <button
-            onClick={reset}
+            onClick={nextItem}
             style={buttonStyles.primary("#84fab0")}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
@@ -72,19 +75,14 @@ export default function Feedback({
           <p style={typography.label}>
             Correct dots for <strong>{selectedLetter.toUpperCase()}</strong>:
           </p>
-          <p
-            style={{
-              ...typography.label,
-              fontWeight: "bold",
-              background: "#f5f5f5",
-              borderRadius: "8px",
-              padding: "1rem",
-            }}
-          >
-            {feedback.correctDots.join(", ")}
-          </p>
+          <div style={{ margin: "1rem 0" }}>
+            <BrailleCell
+              selectedLetter={selectedLetter}
+              correctDots={feedback.correctDots}
+            />
+          </div>
           <button
-            onClick={reset}
+            onClick={tryAgain}
             style={buttonStyles.primary("#fa709a")}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";

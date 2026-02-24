@@ -9,10 +9,10 @@ import {
 
 interface Props {
   onSelect: (mode: Mode) => void;
-  mode: Mode; // Added mode prop
+  selectedMode?: Mode;
 }
 
-export default function ModeSelect({ onSelect }: Props) {
+export default function ModeSelect({ onSelect, selectedMode }: Props) {
   const handleModeSelect = (mode: Mode) => {
     onSelect(mode);
     // Logic to display the corresponding dialogue and screen
@@ -50,7 +50,16 @@ export default function ModeSelect({ onSelect }: Props) {
       >
         <button
           onClick={() => handleModeSelect("letter")}
-          style={buttonStyles.primary(colorSchemes.letter.primary)}
+          style={{
+            ...buttonStyles.primary(colorSchemes.letter.primary),
+            ...(selectedMode === "letter"
+              ? {
+                  border: "3px solid #333",
+                  boxShadow: `0 0 20px ${colorSchemes.letter.shadow}`,
+                  transform: "scale(1.05)",
+                }
+              : {}),
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-2px)";
             e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.letter.shadow}`;
@@ -64,7 +73,16 @@ export default function ModeSelect({ onSelect }: Props) {
         </button>
         <button
           onClick={() => handleModeSelect("word")}
-          style={buttonStyles.primary(colorSchemes.word.primary)}
+          style={{
+            ...buttonStyles.primary(colorSchemes.word.primary),
+            ...(selectedMode === "word"
+              ? {
+                  border: "3px solid #333",
+                  boxShadow: `0 0 20px ${colorSchemes.word.shadow}`,
+                  transform: "scale(1.05)",
+                }
+              : {}),
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-2px)";
             e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.word.shadow}`;
@@ -78,7 +96,16 @@ export default function ModeSelect({ onSelect }: Props) {
         </button>
         <button
           onClick={() => handleModeSelect("dot")}
-          style={buttonStyles.primary(colorSchemes.dot.primary)}
+          style={{
+            ...buttonStyles.primary(colorSchemes.dot.primary),
+            ...(selectedMode === "dot"
+              ? {
+                  border: "3px solid #333",
+                  boxShadow: `0 0 20px ${colorSchemes.dot.shadow}`,
+                  transform: "scale(1.05)",
+                }
+              : {}),
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-2px)";
             e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.dot.shadow}`;
