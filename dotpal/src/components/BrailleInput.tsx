@@ -1,5 +1,6 @@
 import { type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
+import { boxStyles, buttonStyles, typography, spacing } from "../styles/theme";
 
 interface Props {
   selectedLetter: string;
@@ -32,14 +33,7 @@ export default function BrailleInput({
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1.5rem",
-        padding: "2rem",
-        background: "white",
-        borderRadius: "15px",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+        ...boxStyles.card,
         maxWidth: "700px",
         width: "100%",
         position: "relative",
@@ -48,25 +42,17 @@ export default function BrailleInput({
       <button
         onClick={onBack}
         style={{
+          ...buttonStyles.secondary,
           position: "absolute",
-          top: "1.5rem",
-          right: "1.5rem",
-          padding: "0.6rem 1.2rem",
-          fontSize: "0.85rem",
-          fontWeight: "bold",
-          background: "rgba(102, 126, 234, 0.1)",
-          color: "#667eea",
-          border: "1.5px solid #667eea",
-          borderRadius: "8px",
-          cursor: "pointer",
-          transition: "all 0.2s",
+          top: spacing.md,
+          left: spacing.md,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-          e.currentTarget.style.transform = "translateY(-1px)";
+          e.currentTarget.style.background = "#f0f0f0";
+          e.currentTarget.style.transform = "translate(-1px, -1px)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
+          e.currentTarget.style.background = "#ffffff";
           e.currentTarget.style.transform = "translateY(0)";
         }}
       >
@@ -74,15 +60,21 @@ export default function BrailleInput({
       </button>
       <h2
         style={{
-          fontSize: "1.4rem",
-          color: "#333",
-          margin: "0 0 0.5rem 0",
-          paddingTop: "1.5rem",
+          ...typography.heading2,
+          color: "#000000",
+          margin: `0 0 0rem 0`,
+          paddingTop: spacing.md,
+          textAlign: "center",
+          fontSize: "clamp(1.2rem, 3vw, 1.8rem)",
         }}
       >
-        Enter Braille dots for{" "}
+        Enter Braille for{" "}
         <span
-          style={{ fontSize: "1.6rem", fontWeight: "bold", color: "#667eea" }}
+          style={{
+            fontSize: "clamp(1.4rem, 3.5vw, 2rem)",
+            fontWeight: "900",
+            color: "#000000",
+          }}
         >
           {selectedLetter.toUpperCase()}
         </span>
@@ -92,30 +84,17 @@ export default function BrailleInput({
         onDotToggle={toggleDot}
         selectedLetter={selectedLetter}
       />
-      <div style={{ display: "flex", gap: "1rem" }}>
+      <div style={{ display: "flex", gap: spacing.md }}>
         <button
           onClick={onSubmit}
-          style={{
-            padding: "0.75rem 2rem",
-            fontSize: "1.1rem",
-            fontWeight: "bold",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(102, 126, 234, 0.3)",
-            transition: "transform 0.2s, box-shadow 0.2s",
-          }}
+          style={buttonStyles.primary()}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow =
-              "0 6px 16px rgba(102, 126, 234, 0.4)";
+            e.currentTarget.style.transform = "translate(-2px, -2px)";
+            e.currentTarget.style.boxShadow = "6px 6px 0px rgba(0,0,0,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(102, 126, 234, 0.3)";
+            e.currentTarget.style.boxShadow = "4px 4px 0px rgba(0,0,0,0.3)";
           }}
         >
           ✓ Submit

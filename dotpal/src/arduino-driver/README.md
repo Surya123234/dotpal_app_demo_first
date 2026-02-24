@@ -1,14 +1,34 @@
 # Arduino Driver Package
 
-A lightweight, standalone driver for managing Arduino serial input in the browser using the Web Serial API. This package handles all low-level serial communication and input parsing, returning high-level typed events that applications can easily consume.
+A lightweight, standalone driver for handing the heavy lifting for Arduino input processing for the DotPal toy. This package handles all low-level serial communication and input parsing, returning high-level typed events that applications can easily consume.
+
+This Readme contains information regarding the Driver's:
+- Features
+- Installation Guide
+- Usage Guide
+- Comprehensive API Reference
+- Event Types
+- Serial Communication Details
+- Example Integration
+
+## Integration with Applications
+
+This driver is intentionally separated from application-specific logic (like Braille validation). The consuming application should:
+
+1. **Initialize** the driver with event callbacks
+2. **Receive** typed events from the driver
+3. **Apply Business Logic** based on the events (validation, state management, etc.)
+4. **Update UI** based on application state
+
+This separation ensures the driver can be reused across different projects without modification.
+
 
 ## Features
 
 - **Completely Standalone**: No dependencies on application logic or domain-specific code
-- **Type-Safe Events**: Comprehensive TypeScript support with union types for all possible input events
 - **Simple API**: Easy to integrate and use in any React or vanilla JavaScript project
-- **Automatic Input Parsing**: Converts raw serial input into typed, actionable events
-- **Connection Management**: Built-in connection lifecycle management with callbacks
+- **Automatic Input Parsing**: Converts raw serial input into typed, events
+- **Connection Management**: Built-in connection lifecycle management
 
 ## Installation
 
@@ -169,27 +189,6 @@ The driver automatically parses raw serial input according to these rules:
 - **Buffer Management**: Automatically handles incomplete lines and buffering
 - **Read Loop**: Continuous async read loop that processes complete lines as they arrive
 - **Error Handling**: Gracefully handles connection errors and disconnections
-
-## Integration with Applications
-
-This driver is intentionally separated from application-specific logic (like Braille validation). The consuming application should:
-
-1. **Initialize** the driver with event callbacks
-2. **Receive** typed events from the driver
-3. **Apply Business Logic** based on the events (validation, state management, etc.)
-4. **Update UI** based on application state
-
-This separation ensures the driver can be reused across different projects without modification.
-
-## Design Philosophy
-
-The ArduinoDriver follows these principles:
-
-- **Single Responsibility**: Only handles serial I/O and input parsing
-- **Framework Agnostic**: Works with React, Vue, vanilla JS, or any framework
-- **Type Safe**: Full TypeScript support with exhaustive event types
-- **No Side Effects**: Doesn't modify application state directly
-- **Composable**: Designed to be used with application-level event handlers
 
 ## Example: Full Integration
 

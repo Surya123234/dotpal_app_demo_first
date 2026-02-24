@@ -36,11 +36,42 @@ export class ArduinoDriver {
   }
 
   /**
-   * Connect to Arduino via Web Serial API
+   * Get list of available (previously opened) serial ports
    */
-  async connect() {
+  async getAvailablePorts(): Promise<SerialPort[]> {
     try {
-      this.port = await navigator.serial.requestPort();
+      return await navigator.serial.getPorts();
+    } catch (error) {
+      console.error("Failed to get available ports:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Request user to select a port (shows browser's port picker dialog)
+   */
+  async requestPortFromUser(): Promise<SerialPort> {
+    try {
+      return await navigator.serial.requestPort();
+    } catch (error) {
+      console.error("User cancelled port selection:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Connect to Arduino via Web Serial API
+   * If no port is provided, will request user to select one via browser dialog
+   */
+  async connect(port?: SerialPort) {
+    try {
+      // If no port provided, request user to select one
+      if (!port) {
+        this.port = await this.requestPortFromUser();
+      } else {
+        this.port = port;
+      }
+
       await this.port.open({ baudRate: this.options.baudRate || 9600 });
       this.isConnected = true;
       this.options.onConnect?.();
@@ -75,36 +106,34 @@ export class ArduinoDriver {
 
   /**
    * Parse raw Arduino input into typed events
-   * Supports:
-   * - Single letters (A-Z): letter pressed
-   * - "UP": dot 1 pressed
-   * - "DOWN": dot 1 released
+   * Supported formats:
+   * - Single letters (A-Z): letter selected
+   * - "X, UP" or "X, DOWN" where X is 1..6: dot X pressed/released
    * - "SUBMIT": submit button pressed
    */
   private parseInput(input: string): ArduinoInputEvent {
     const trimmed = input.trim().toUpperCase();
 
-    // Check if it's a single letter (A-Z)
+    // Single letter (A-Z)
     if (trimmed.length === 1 && /^[A-Z]$/.test(trimmed)) {
       return { type: "letter", value: trimmed };
     }
 
-    // Check for dot 1 press (UP)
-    if (trimmed === "UP") {
-      return { type: "dot", dot: 1, pressed: true };
-    }
-
-    // Check for dot 1 release (DOWN)
-    if (trimmed === "DOWN") {
-      return { type: "dot", dot: 1, pressed: false };
-    }
-
-    // Check for submit command
+    // Submit
     if (trimmed === "SUBMIT") {
       return { type: "submit" };
     }
 
-    // Unknown input, return as raw
+    // Match formats like "3, UP" or "6, DOWN" (allow spaces)
+    const dotMatch = trimmed.match(/^([1-6])\s*,\s*(UP|DOWN)$/);
+    if (dotMatch) {
+      const dot = Number(dotMatch[1]);
+      const action = dotMatch[2];
+      const pressed = action === "UP";
+      return { type: "dot", dot, pressed };
+    }
+
+    // Unknown input
     return { type: "raw", value: trimmed };
   }
 

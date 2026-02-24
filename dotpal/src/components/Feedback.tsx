@@ -1,11 +1,15 @@
 import { useEffect } from "react";
-import type { FeedbackResult } from "./arduino";
+import type { FeedbackResult } from "./BrailleApp";
+import BrailleCell from "./BrailleCell";
+import { boxStyles, buttonStyles, typography } from "../styles/theme";
 
 interface Props {
   feedback: FeedbackResult;
   selectedLetter: string;
   selectedMode: string;
   reset: () => void;
+  onTryAgain: () => void;
+  onNext: () => void;
 }
 
 export default function Feedback({
@@ -13,10 +17,12 @@ export default function Feedback({
   selectedLetter,
   selectedMode,
   reset,
+  onTryAgain,
+  onNext,
 }: Props) {
   useEffect(() => {
     const audio = new Audio(
-      feedback.correct ? "/audios/yay.mp3" : "/audios/wrong.mp3"
+      feedback.correct ? "/audios/yay.mp3" : "/audios/wrong.mp3",
     );
     audio.play().catch(() => {
       /* ignore play errors (autoplay policy, etc.) */
@@ -24,129 +30,77 @@ export default function Feedback({
   }, [feedback.correct]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "white",
-        padding: "2rem",
-        borderRadius: "15px",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-        textAlign: "center",
-        maxWidth: "600px",
-      }}
-    >
+    <div style={boxStyles.card}>
       {feedback.correct ? (
         <>
           <h2
             style={{
+              ...typography.heading1,
+              color: "#000000",
               fontSize: "2.5rem",
-              margin: "0 0 1rem 0",
-              color: "#34a853",
             }}
           >
             ✅ Correct!
           </h2>
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "#666",
-              marginBottom: "1.5rem",
-            }}
-          >
+          <p style={{ ...typography.heading2, color: "#000000" }}>
             Great job! You got it right!
           </p>
           <button
-            onClick={reset}
-            style={{
-              padding: "0.75rem 2rem",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              background: "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(132, 250, 176, 0.3)",
-              transition: "transform 0.2s, box-shadow 0.2s",
-            }}
+            onClick={onNext}
+            style={buttonStyles.primary()}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(132, 250, 176, 0.4)";
+              e.currentTarget.style.transform = "translate(-2px, -2px)";
+              e.currentTarget.style.boxShadow = "6px 6px 0px black";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(132, 250, 176, 0.3)";
+              e.currentTarget.style.boxShadow = "4px 4px 0px black";
             }}
           >
             Next{" "}
             {selectedMode === "letter"
               ? "Letter"
               : selectedMode === "word"
-              ? "Word"
-              : "Dot"}
+                ? "Word"
+                : "Dot"}
           </button>
         </>
       ) : (
         <>
           <h2
             style={{
+              ...typography.heading1,
+              color: "#000000",
               fontSize: "2.5rem",
-              margin: "0 0 1rem 0",
-              color: "#ea4335",
             }}
           >
             ❌ Not Quite!
           </h2>
           <p
             style={{
-              fontSize: "1rem",
-              color: "#666",
-              marginBottom: "1.5rem",
+              ...typography.heading2,
+              color: "#000000",
+              margin: "0",
             }}
           >
             Correct dots for <strong>{selectedLetter.toUpperCase()}</strong>:
           </p>
-          <p
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: "bold",
-              color: "#333",
-              marginBottom: "1.5rem",
-              padding: "1rem",
-              background: "#f5f5f5",
-              borderRadius: "8px",
-            }}
-          >
-            {feedback.correctDots.join(", ")}
-          </p>
+          <div style={{ margin: "0" }}>
+            <BrailleCell
+              selectedLetter={selectedLetter}
+              correctDots={feedback.correctDots}
+            />
+          </div>
           <button
-            onClick={reset}
-            style={{
-              padding: "0.75rem 2rem",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              background: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(250, 112, 154, 0.3)",
-              transition: "transform 0.2s, box-shadow 0.2s",
-            }}
+            onClick={onTryAgain}
+            style={buttonStyles.primary()}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(250, 112, 154, 0.4)";
+              e.currentTarget.style.transform = "translate(-2px, -2px)";
+              e.currentTarget.style.boxShadow = "6px 6px 0px black";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(250, 112, 154, 0.3)";
+              e.currentTarget.style.boxShadow = "4px 4px 0px black";
             }}
           >
             Try Again

@@ -1,5 +1,5 @@
-import Arduino from "./components/arduino";
+import BrailleApp from "./components/BrailleApp";
 
 export default function App() {
-  return <Arduino />;
+  return <BrailleApp />;
 }
