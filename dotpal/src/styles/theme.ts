@@ -35,7 +35,7 @@ export const boxStyles = {
     flexDirection: "column" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    gap: "2rem",
+    gap: "1rem",
     padding: "clamp(1.5rem, 2.5vw, 2.5rem)",
     background: "#ffffff",
     borderRadius: "0px",

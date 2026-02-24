@@ -62,7 +62,7 @@ export default function BrailleInput({
         style={{
           ...typography.heading2,
           color: "#000000",
-          margin: `0 0 ${spacing.lg} 0`,
+          margin: `0 0 0.3rem 0`,
           paddingTop: spacing.md,
           textAlign: "center",
           fontSize: "clamp(1.2rem, 3vw, 1.8rem)",
@@ -84,7 +84,7 @@ export default function BrailleInput({
         onDotToggle={toggleDot}
         selectedLetter={selectedLetter}
       />
-      <div style={{ display: "flex", gap: spacing.lg }}>
+      <div style={{ display: "flex", gap: spacing.md }}>
         <button
           onClick={onSubmit}
           style={buttonStyles.primary()}

@@ -76,10 +76,10 @@ export default function Feedback({
           >
             ❌ Not Quite!
           </h2>
-          <p style={{ ...typography.heading2, color: "#000000" }}>
+          <p style={{ ...typography.heading2, color: "#000000", margin: "0 0 0.3rem 0" }}>
             Correct dots for <strong>{selectedLetter.toUpperCase()}</strong>:
           </p>
-          <div style={{ margin: "2rem 0" }}>
+          <div style={{ margin: "0" }}>
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={feedback.correctDots}
