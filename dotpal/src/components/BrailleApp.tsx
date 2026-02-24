@@ -173,7 +173,7 @@ export default function BrailleApp() {
     setMode(newMode);
   };
 
-  // Initialize driver on mount and auto-connect; keep connection until unplugged
+  // Initialize driver on mount but don't auto-connect
   useEffect(() => {
     const driver = new ArduinoDriver({
       onInput: handleArduinoInput,
@@ -182,15 +182,18 @@ export default function BrailleApp() {
       baudRate: 9600,
     });
     driverRef.current = driver;
-
-    // Attempt to auto-connect; if permissions are needed the browser will prompt
-    driver.connect().catch(() => {
-      /* ignore connection errors for now */
-    });
-
-    // Intentionally do not call disconnect on unmount. Keep the port open until
-    // the device is unplugged so the driver maintains a persistent connection.
   }, []);
+
+  const handleConnectArduino = async () => {
+    if (!driverRef.current) return;
+
+    try {
+      await driverRef.current.connect();
+    } catch (error) {
+      console.error("Failed to connect to Arduino:", error);
+      alert("Failed to connect to Arduino. Please try again.");
+    }
+  };
   const goHome = () => {
     // Reset UI state but keep the Arduino driver connection alive
     reset();
@@ -231,10 +234,27 @@ export default function BrailleApp() {
         )}
 
         {!isConnected && (
-          <div style={boxStyles.statusIndicator(false, true)}>
-            <p style={{ ...typography.label, margin: 0, fontWeight: "bold" }}>
-              ⏳ Connecting Arduino...
-            </p>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: spacing.sm,
+            }}
+          >
+            <div style={boxStyles.statusIndicator(false, true)}>
+              <p style={{ ...typography.label, margin: 0, fontWeight: "bold" }}>
+                ⏳ Arduino Disconnected
+              </p>
+            </div>
+            <button
+              onClick={handleConnectArduino}
+              style={{
+                ...buttonStyles.primary,
+                backgroundColor: colorSchemes.word.primary,
+              }}
+            >
+              Select Arduino Port
+            </button>
           </div>
         )}
 

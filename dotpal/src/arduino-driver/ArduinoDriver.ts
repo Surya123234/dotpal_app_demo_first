@@ -36,11 +36,42 @@ export class ArduinoDriver {
   }
 
   /**
-   * Connect to Arduino via Web Serial API
+   * Get list of available (previously opened) serial ports
    */
-  async connect() {
+  async getAvailablePorts(): Promise<SerialPort[]> {
     try {
-      this.port = await navigator.serial.requestPort();
+      return await navigator.serial.getPorts();
+    } catch (error) {
+      console.error("Failed to get available ports:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Request user to select a port (shows browser's port picker dialog)
+   */
+  async requestPortFromUser(): Promise<SerialPort> {
+    try {
+      return await navigator.serial.requestPort();
+    } catch (error) {
+      console.error("User cancelled port selection:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Connect to Arduino via Web Serial API
+   * If no port is provided, will request user to select one via browser dialog
+   */
+  async connect(port?: SerialPort) {
+    try {
+      // If no port provided, request user to select one
+      if (!port) {
+        this.port = await this.requestPortFromUser();
+      } else {
+        this.port = port;
+      }
+
       await this.port.open({ baudRate: this.options.baudRate || 9600 });
       this.isConnected = true;
       this.options.onConnect?.();
