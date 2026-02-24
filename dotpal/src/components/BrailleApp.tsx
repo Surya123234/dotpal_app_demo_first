@@ -273,7 +273,7 @@ export default function BrailleApp() {
             padding: "1rem",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             alignItems: "stretch",
             minWidth: "280px",
             width: "clamp(240px, 22vw, 300px)",
