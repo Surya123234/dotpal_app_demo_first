@@ -10,14 +10,16 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: clamp(1rem, 2vw, 1.8rem);
-  padding: clamp(1.5rem, 3vw, 3rem);
+  gap: clamp(0.8rem, 1.5vw, 1.4rem);
+  padding: clamp(1.2rem, 2.5vw, 2rem);
   background: #ffffff;
   border: 3px solid #000000;
   border-radius: 0px;
-  min-width: clamp(280px, 70vw, 450px);
-  min-height: clamp(300px, 70vw, 450px);
+  width: clamp(280px, 100%, 400px);
+  height: auto;
+  aspect-ratio: 1;
   box-shadow: 0 0 0 2px #000000;
+  margin: 0 auto;
 }
 
 .dot {

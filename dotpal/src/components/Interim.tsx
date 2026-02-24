@@ -21,16 +21,30 @@ export default function Interim({ mode, selectedLetter }: Props) {
   const correctDots = brailleMap[selectedLetter.toLowerCase()] || [];
 
   return (
-    <div style={boxStyles.card}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.lg,
+        padding: "clamp(1.5rem, 3vw, 2rem)",
+        background: "#ffffff",
+        borderRadius: "0px",
+        boxShadow: "0 0 0 2px #000000",
+        maxWidth: "clamp(500px, 90vw, 750px)",
+        width: "100%",
+      }}
+    >
       {/* Letter display */}
       <div
         style={{
           fontSize:
             mode === "dot"
-              ? "clamp(2.5rem, 8vw, 4rem)"
+              ? "clamp(2.5rem, 6vw, 3.5rem)"
               : mode === "word"
-                ? "clamp(3rem, 10vw, 6rem)"
-                : "clamp(5rem, 15vw, 10rem)",
+                ? "clamp(3rem, 8vw, 5rem)"
+                : "clamp(5rem, 12vw, 8rem)",
           fontWeight: "900",
           color: "#000000",
           textShadow: "none",
@@ -42,31 +56,42 @@ export default function Interim({ mode, selectedLetter }: Props) {
 
       {/* Mode-specific content */}
       {mode === "dot" && (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: spacing.lg,
+            width: "100%",
+          }}
+        >
           <h2
             style={{
               ...typography.heading2,
               color: "#000000",
               textShadow: "none",
-              margin: `0 0 ${spacing.lg} 0`,
+              margin: 0,
               textAlign: "center",
+              fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
             }}
           >
             Here's the braille for{" "}
             <span
               style={{
                 fontWeight: "900",
-                fontSize: "1.8rem",
+                fontSize: "clamp(1.4rem, 3.5vw, 1.8rem)",
                 color: "#000000",
               }}
             >
               {selectedLetter.toUpperCase()}
             </span>
           </h2>
-          <BrailleCell
-            selectedLetter={selectedLetter}
-            correctDots={correctDots as BrailleDot[]}
-          />
+          <div style={{ width: "100%", maxHeight: "60vh", overflow: "auto" }}>
+            <BrailleCell
+              selectedLetter={selectedLetter}
+              correctDots={correctDots as BrailleDot[]}
+            />
+          </div>
         </div>
       )}
 
@@ -75,9 +100,9 @@ export default function Interim({ mode, selectedLetter }: Props) {
           style={{
             borderRadius: "0px",
             overflow: "hidden",
-            boxShadow: "0 0 0 3px #000000",
+            boxShadow: "0 0 0 2px #000000",
             width: "100%",
-            maxWidth: "500px",
+            maxWidth: "clamp(400px, 85vw, 600px)",
             border: "3px solid #000000",
           }}
         >
@@ -87,7 +112,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: "400px",
+              maxHeight: "clamp(250px, 50vh, 400px)",
               objectFit: "cover",
               display: "block",
             }}
@@ -100,7 +125,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
           ...typography.label,
           margin: 0,
           color: "#000000",
-          fontSize: "1.3rem",
+          fontSize: "clamp(1rem, 2vw, 1.2rem)",
         }}
       >
         Press SUBMIT when ready

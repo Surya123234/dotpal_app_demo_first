@@ -281,6 +281,27 @@ export default function BrailleApp() {
             gap: spacing.lg,
           }}
         >
+          {/* Mode indicator during flow */}
+          {mode && (
+            <div
+              style={{
+                background: "#000000",
+                color: "#ffffff",
+                padding: "0.8rem 1.2rem",
+                borderRadius: "0px",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                border: "2px solid #000000",
+              }}
+            >
+              {mode === "letter"
+                ? "📝 Letter Mode"
+                : mode === "word"
+                  ? "🍎 Word Mode"
+                  : "⚪ Dot Mode"}
+            </div>
+          )}
           {!mode && (
             <ModeSelect mode={defaultMode} onSelect={handleModeSelect} />
           )}
