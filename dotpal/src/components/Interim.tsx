@@ -27,7 +27,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "flex-start",
-        gap: "0.3rem",
+        gap: "0.2rem",
         padding: "clamp(1rem, 2.5vw, 1.5rem)",
         background: "#ffffff",
         borderRadius: "0px",
