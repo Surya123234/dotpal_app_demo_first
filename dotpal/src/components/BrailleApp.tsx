@@ -270,42 +270,80 @@ export default function BrailleApp() {
           style={{
             background: "#ffffff",
             borderRight: "3px solid #000000",
-            padding: "1.5rem",
+            padding: "1rem",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
             alignItems: "stretch",
-            minWidth: "320px",
-            width: "clamp(280px, 28vw, 380px)",
+            minWidth: "280px",
+            width: "clamp(240px, 22vw, 300px)",
             overflowY: "auto",
-            gap: spacing.lg,
+            gap: spacing.md,
           }}
         >
           {/* Mode indicator during flow */}
           {mode && (
             <div
               style={{
-                background: "#000000",
-                color: "#ffffff",
-                padding: "0.8rem 1.2rem",
-                borderRadius: "0px",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                border: "2px solid #000000",
+                display: "flex",
+                flexDirection: "column",
+                gap: spacing.sm,
               }}
             >
-              {mode === "letter"
-                ? "📝 Letter Mode"
-                : mode === "word"
-                  ? "🍎 Word Mode"
-                  : "⚪ Dot Mode"}
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#666",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Current Mode
+              </div>
+              <div
+                style={{
+                  background: "#000000",
+                  color: "#ffffff",
+                  padding: "0.8rem 1rem",
+                  borderRadius: "0px",
+                  textAlign: "center",
+                  fontWeight: "900",
+                  fontSize: "1.1rem",
+                  border: "2px solid #000000",
+                }}
+              >
+                {mode === "letter"
+                  ? "📝 Letter"
+                  : mode === "word"
+                    ? "🍎 Word"
+                    : "⚪ Dot"}
+              </div>
             </div>
           )}
           {!mode && (
             <ModeSelect mode={defaultMode} onSelect={handleModeSelect} />
           )}
-          {mode && <ModeSelect mode={mode} onSelect={handleModeSelect} />}
+          {mode && (
+            <>
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#666",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Switch Mode
+              </div>
+              <ModeSelect
+                mode={mode}
+                onSelect={handleModeSelect}
+                showOnlyOtherModes={true}
+              />
+            </>
+          )}
         </div>
 
         {/* Right Main Content */}

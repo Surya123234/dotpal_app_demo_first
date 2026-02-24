@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { brailleMap, type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
-import { boxStyles, typography, spacing } from "../styles/theme";
+import { typography, spacing } from "../styles/theme";
 
 interface Props {
   mode: "letter" | "word" | "dot";
@@ -26,14 +26,17 @@ export default function Interim({ mode, selectedLetter }: Props) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        gap: spacing.lg,
-        padding: "clamp(1.5rem, 3vw, 2rem)",
+        justifyContent: "flex-start",
+        gap: spacing.sm,
+        padding: "clamp(1rem, 2.5vw, 1.5rem)",
         background: "#ffffff",
         borderRadius: "0px",
         boxShadow: "0 0 0 2px #000000",
-        maxWidth: "clamp(500px, 90vw, 750px)",
+        maxWidth: "clamp(600px, 95vw, 900px)",
         width: "100%",
+        height: "fit-content",
+        maxHeight: "85vh",
+        overflowY: "auto",
       }}
     >
       {/* Letter display */}
@@ -41,14 +44,15 @@ export default function Interim({ mode, selectedLetter }: Props) {
         style={{
           fontSize:
             mode === "dot"
-              ? "clamp(2.5rem, 6vw, 3.5rem)"
+              ? "clamp(2rem, 5vw, 3rem)"
               : mode === "word"
-                ? "clamp(3rem, 8vw, 5rem)"
-                : "clamp(5rem, 12vw, 8rem)",
+                ? "clamp(2.5rem, 6vw, 4rem)"
+                : "clamp(4rem, 10vw, 6rem)",
           fontWeight: "900",
           color: "#000000",
           textShadow: "none",
           animation: mode === "letter" ? "none" : "pulse 2s infinite",
+          margin: 0,
         }}
       >
         {selectedLetter.toUpperCase()}
@@ -61,7 +65,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: spacing.lg,
+            gap: spacing.sm,
             width: "100%",
           }}
         >
@@ -72,21 +76,21 @@ export default function Interim({ mode, selectedLetter }: Props) {
               textShadow: "none",
               margin: 0,
               textAlign: "center",
-              fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
+              fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
             }}
           >
-            Here's the braille for{" "}
+            Braille for{" "}
             <span
               style={{
                 fontWeight: "900",
-                fontSize: "clamp(1.4rem, 3.5vw, 1.8rem)",
+                fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
                 color: "#000000",
               }}
             >
               {selectedLetter.toUpperCase()}
             </span>
           </h2>
-          <div style={{ width: "100%", maxHeight: "60vh", overflow: "auto" }}>
+          <div style={{ width: "100%", maxHeight: "45vh", overflow: "auto" }}>
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={correctDots as BrailleDot[]}
@@ -102,7 +106,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
             overflow: "hidden",
             boxShadow: "0 0 0 2px #000000",
             width: "100%",
-            maxWidth: "clamp(400px, 85vw, 600px)",
+            maxWidth: "clamp(350px, 80vw, 550px)",
             border: "3px solid #000000",
           }}
         >
@@ -112,7 +116,7 @@ export default function Interim({ mode, selectedLetter }: Props) {
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: "clamp(250px, 50vh, 400px)",
+              maxHeight: "clamp(200px, 45vh, 350px)",
               objectFit: "cover",
               display: "block",
             }}
@@ -125,10 +129,10 @@ export default function Interim({ mode, selectedLetter }: Props) {
           ...typography.label,
           margin: 0,
           color: "#000000",
-          fontSize: "clamp(1rem, 2vw, 1.2rem)",
+          fontSize: "clamp(0.9rem, 1.8vw, 1rem)",
         }}
       >
-        Press SUBMIT when ready
+        Press SUBMIT
       </p>
 
       <style>{`
