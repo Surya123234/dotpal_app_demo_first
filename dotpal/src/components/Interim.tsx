@@ -26,7 +26,11 @@ export default function Interim({ mode, selectedLetter }: Props) {
       <div
         style={{
           fontSize:
-            mode === "dot" ? "clamp(2.5rem, 8vw, 4rem)" : mode === "word" ? "clamp(3rem, 10vw, 6rem)" : "clamp(5rem, 15vw, 10rem)",
+            mode === "dot"
+              ? "clamp(2.5rem, 8vw, 4rem)"
+              : mode === "word"
+                ? "clamp(3rem, 10vw, 6rem)"
+                : "clamp(5rem, 15vw, 10rem)",
           fontWeight: "900",
           color: "#000000",
           textShadow: "none",

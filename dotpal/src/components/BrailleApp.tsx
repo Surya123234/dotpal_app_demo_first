@@ -224,7 +224,14 @@ export default function BrailleApp() {
         }}
       >
         <div>
-          <h1 style={{ ...typography.heading1, color: "#000000", margin: 0, fontSize: "1.8rem" }}>
+          <h1
+            style={{
+              ...typography.heading1,
+              color: "#000000",
+              margin: 0,
+              fontSize: "1.8rem",
+            }}
+          >
             DotPal
           </h1>
         </div>

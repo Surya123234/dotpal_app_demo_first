@@ -18,10 +18,24 @@ export default function LetterSelect({}: Props) {
         textAlign: "center",
       }}
     >
-      <h2 style={{ fontSize: "2.5rem", color: "black", margin: 0, fontWeight: "bold" }}>
+      <h2
+        style={{
+          fontSize: "2.5rem",
+          color: "black",
+          margin: 0,
+          fontWeight: "bold",
+        }}
+      >
         📚 Select a Letter
       </h2>
-      <p style={{ fontSize: "1.8rem", color: "black", margin: 0, fontWeight: "bold" }}>
+      <p
+        style={{
+          fontSize: "1.8rem",
+          color: "black",
+          margin: 0,
+          fontWeight: "bold",
+        }}
+      >
         (Using Arduino Input)
       </p>
     </div>
