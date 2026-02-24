@@ -75,36 +75,34 @@ export class ArduinoDriver {
 
   /**
    * Parse raw Arduino input into typed events
-   * Supports:
-   * - Single letters (A-Z): letter pressed
-   * - "UP": dot 1 pressed
-   * - "DOWN": dot 1 released
+   * Supported formats:
+   * - Single letters (A-Z): letter selected
+   * - "X, UP" or "X, DOWN" where X is 1..6: dot X pressed/released
    * - "SUBMIT": submit button pressed
    */
   private parseInput(input: string): ArduinoInputEvent {
     const trimmed = input.trim().toUpperCase();
 
-    // Check if it's a single letter (A-Z)
+    // Single letter (A-Z)
     if (trimmed.length === 1 && /^[A-Z]$/.test(trimmed)) {
       return { type: "letter", value: trimmed };
     }
 
-    // Check for dot 1 press (UP)
-    if (trimmed === "UP") {
-      return { type: "dot", dot: 1, pressed: true };
-    }
-
-    // Check for dot 1 release (DOWN)
-    if (trimmed === "DOWN") {
-      return { type: "dot", dot: 1, pressed: false };
-    }
-
-    // Check for submit command
+    // Submit
     if (trimmed === "SUBMIT") {
       return { type: "submit" };
     }
 
-    // Unknown input, return as raw
+    // Match formats like "3, UP" or "6, DOWN" (allow spaces)
+    const dotMatch = trimmed.match(/^([1-6])\s*,\s*(UP|DOWN)$/);
+    if (dotMatch) {
+      const dot = Number(dotMatch[1]);
+      const action = dotMatch[2];
+      const pressed = action === "UP";
+      return { type: "dot", dot, pressed };
+    }
+
+    // Unknown input
     return { type: "raw", value: trimmed };
   }
 
