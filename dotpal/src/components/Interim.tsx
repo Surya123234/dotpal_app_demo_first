@@ -93,7 +93,14 @@ export default function Interim({ mode, selectedLetter }: Props) {
               {selectedLetter.toUpperCase()}
             </span>
           </h2>
-          <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              width: "100%",
+              overflow: "hidden",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={correctDots as BrailleDot[]}
