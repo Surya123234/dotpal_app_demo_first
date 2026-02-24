@@ -45,7 +45,7 @@ export default function BrailleInput({
           ...buttonStyles.secondary,
           position: "absolute",
           top: spacing.md,
-          right: spacing.md,
+          left: spacing.md,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = "#f0f0f0";

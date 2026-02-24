@@ -30,7 +30,7 @@
   background-color: #f0f0f0;
   border: 3px solid #000000;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,19 +38,21 @@
   gap: 0.3rem;
   user-select: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
 .dot:hover {
   transform: scale(1.08);
   background-color: #e0e0e0;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  outline-color: rgba(0, 0, 0, 0.3);
 }
 
 .dot.pressed {
   background: #000000;
   border-color: #000000;
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 0 0 2px #ffffff;
   transform: scale(1.05);
 }
