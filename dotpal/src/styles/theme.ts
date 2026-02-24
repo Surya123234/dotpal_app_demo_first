@@ -1,30 +1,30 @@
 /**
  * Theme and Style Constants
- * Centralized styling for consistent appearance across components
+ * Black and White Contrasting Theme for Full Desktop Utilization
  */
 
-// Color Schemes for each learning mode
+// Black and White Color Scheme
 export const colorSchemes = {
   letter: {
-    primary: "#667eea",
-    secondary: "#764ba2",
-    shadow: "rgba(102, 126, 234, 0.2)",
-    buttonShadow: "rgba(102, 126, 234, 0.3)",
-    buttonShadowHover: "rgba(102, 126, 234, 0.4)",
+    primary: "#000000",
+    secondary: "#1a1a1a",
+    shadow: "rgba(0, 0, 0, 0.3)",
+    buttonShadow: "rgba(0, 0, 0, 0.5)",
+    buttonShadowHover: "rgba(0, 0, 0, 0.7)",
   },
   word: {
-    primary: "#f5576c",
-    secondary: "#f093fb",
-    shadow: "rgba(245, 87, 108, 0.2)",
-    buttonShadow: "rgba(245, 87, 108, 0.3)",
-    buttonShadowHover: "rgba(245, 87, 108, 0.4)",
+    primary: "#000000",
+    secondary: "#1a1a1a",
+    shadow: "rgba(0, 0, 0, 0.3)",
+    buttonShadow: "rgba(0, 0, 0, 0.5)",
+    buttonShadowHover: "rgba(0, 0, 0, 0.7)",
   },
   dot: {
-    primary: "#4facfe",
-    secondary: "#00f2fe",
-    shadow: "rgba(79, 172, 254, 0.2)",
-    buttonShadow: "rgba(79, 172, 254, 0.3)",
-    buttonShadowHover: "rgba(79, 172, 254, 0.4)",
+    primary: "#000000",
+    secondary: "#1a1a1a",
+    shadow: "rgba(0, 0, 0, 0.3)",
+    buttonShadow: "rgba(0, 0, 0, 0.5)",
+    buttonShadowHover: "rgba(0, 0, 0, 0.7)",
   },
 };
 
@@ -36,63 +36,57 @@ export const boxStyles = {
     alignItems: "center" as const,
     justifyContent: "center" as const,
     gap: "2rem",
-    padding: "2rem",
-    background: "white",
-    borderRadius: "15px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-    maxWidth: "600px" as const,
+    padding: "2.5rem",
+    background: "#ffffff",
+    borderRadius: "0px",
+    boxShadow: "0 0 0 2px #000000",
+    maxWidth: "100%" as const,
   },
   cardSmall: {
-    padding: "2rem 1.5rem",
-    background: "white",
-    borderRadius: "15px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-    minWidth: "200px",
+    padding: "2rem 2rem",
+    background: "#ffffff",
+    borderRadius: "0px",
+    boxShadow: "0 0 0 2px #000000",
+    minWidth: "280px",
     textAlign: "center" as const,
   },
   statusIndicator: (isConnected: boolean, isError = false) => ({
-    padding: "1rem",
-    background: isConnected
-      ? "rgba(76, 175, 80, 0.2)"
-      : isError
-        ? "rgba(255, 107, 107, 0.2)"
-        : "rgba(100, 100, 100, 0.2)",
-    borderRadius: "8px",
+    padding: "1rem 1.5rem",
+    background: isConnected ? "#000000" : isError ? "#000000" : "#1a1a1a",
+    borderRadius: "0px",
     color: "white",
     textAlign: "center" as const,
     marginBottom: "1rem",
-    border: isConnected
-      ? "1px solid rgba(76, 175, 80, 0.5)"
-      : isError
-        ? "1px solid rgba(255, 107, 107, 0.5)"
-        : "1px solid rgba(100, 100, 100, 0.5)",
+    border: "2px solid #ffffff",
+    fontWeight: "bold" as const,
   }),
 };
 
 // Button Styles
 export const buttonStyles = {
-  primary: (color: string = "#667eea") => ({
-    padding: "0.75rem 2rem",
+  primary: (color: string = "#000000") => ({
+    padding: "1rem 2rem",
     fontSize: "1.1rem",
     fontWeight: "bold" as const,
-    background: `linear-gradient(135deg, ${color} 0%, rgba(0,0,0,0.1) 100%)`,
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
+    background: "#000000",
+    color: "#ffffff",
+    border: "3px solid #000000",
+    borderRadius: "0px",
     cursor: "pointer" as const,
-    boxShadow: `0 4px 12px ${color}50`,
-    transition: "transform 0.2s, box-shadow 0.2s",
+    boxShadow: "4px 4px 0px rgba(0,0,0,0.3)",
+    transition: "all 0.2s",
   }),
   secondary: {
-    padding: "0.6rem 1.2rem",
-    fontSize: "0.85rem",
+    padding: "0.8rem 1.5rem",
+    fontSize: "0.95rem",
     fontWeight: "bold" as const,
-    background: "rgba(102, 126, 234, 0.1)",
-    color: "#667eea",
-    border: "1.5px solid #667eea",
-    borderRadius: "8px",
+    background: "#ffffff",
+    color: "#000000",
+    border: "3px solid #000000",
+    borderRadius: "0px",
     cursor: "pointer" as const,
     transition: "all 0.2s",
+    boxShadow: "3px 3px 0px rgba(0,0,0,0.2)",
   },
 };
 
@@ -118,26 +112,28 @@ export const buttonHoverEffects = {
 // Typography Styles
 export const typography = {
   heading1: {
-    fontSize: "1.8rem",
-    color: "#333",
+    fontSize: "2.5rem",
+    color: "#000000",
     margin: 0,
     fontWeight: "bold" as const,
   },
   heading2: {
-    fontSize: "1.5rem",
-    color: "#333",
+    fontSize: "1.8rem",
+    color: "#000000",
     margin: 0,
     fontWeight: "bold" as const,
   },
   subtitle: {
-    fontSize: "0.9rem",
-    color: "#666",
+    fontSize: "1rem",
+    color: "#000000",
     margin: "0 0 0.5rem 0",
+    fontWeight: "600" as const,
   },
   label: {
-    fontSize: "1.1rem",
-    color: "#666",
+    fontSize: "1.2rem",
+    color: "#000000",
     margin: 0,
+    fontWeight: "600" as const,
   },
 };
 

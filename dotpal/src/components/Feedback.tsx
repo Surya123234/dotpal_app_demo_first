@@ -7,16 +7,14 @@ interface Props {
   feedback: FeedbackResult;
   selectedLetter: string;
   selectedMode: string;
-  tryAgain: () => void;
-  nextItem: () => void;
+  reset: () => void;
 }
 
 export default function Feedback({
   feedback,
   selectedLetter,
   selectedMode,
-  tryAgain,
-  nextItem,
+  reset,
 }: Props) {
   useEffect(() => {
     const audio = new Audio(
@@ -33,25 +31,26 @@ export default function Feedback({
         <>
           <h2
             style={{
-              ...typography.heading2,
-              color: "#34a853",
+              ...typography.heading1,
+              color: "#000000",
+              fontSize: "2.5rem",
             }}
           >
             ✅ Correct!
           </h2>
-          <p style={typography.label}>Great job! You got it right!</p>
+          <p style={{ ...typography.heading2, color: "#000000" }}>
+            Great job! You got it right!
+          </p>
           <button
-            onClick={nextItem}
-            style={buttonStyles.primary("#84fab0")}
+            onClick={reset}
+            style={buttonStyles.primary()}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(132, 250, 176, 0.4)";
+              e.currentTarget.style.transform = "translate(-2px, -2px)";
+              e.currentTarget.style.boxShadow = "6px 6px 0px black";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(132, 250, 176, 0.3)";
+              e.currentTarget.style.boxShadow = "4px 4px 0px black";
             }}
           >
             Next{" "}
@@ -66,33 +65,32 @@ export default function Feedback({
         <>
           <h2
             style={{
-              ...typography.heading2,
-              color: "#ea4335",
+              ...typography.heading1,
+              color: "#000000",
+              fontSize: "2.5rem",
             }}
           >
             ❌ Not Quite!
           </h2>
-          <p style={typography.label}>
+          <p style={{ ...typography.heading2, color: "#000000" }}>
             Correct dots for <strong>{selectedLetter.toUpperCase()}</strong>:
           </p>
-          <div style={{ margin: "1rem 0" }}>
+          <div style={{ margin: "2rem 0" }}>
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={feedback.correctDots}
             />
           </div>
           <button
-            onClick={tryAgain}
-            style={buttonStyles.primary("#fa709a")}
+            onClick={reset}
+            style={buttonStyles.primary()}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(250, 112, 154, 0.4)";
+              e.currentTarget.style.transform = "translate(-2px, -2px)";
+              e.currentTarget.style.boxShadow = "6px 6px 0px black";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(250, 112, 154, 0.3)";
+              e.currentTarget.style.boxShadow = "4px 4px 0px black";
             }}
           >
             Try Again

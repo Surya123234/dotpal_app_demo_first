@@ -8,19 +8,20 @@ export default function LetterSelect({}: Props) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "1rem",
+        gap: "1.5rem",
         padding: "2rem",
         background: "white",
-        borderRadius: "15px",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-        maxWidth: "600px",
+        borderRadius: "0px",
+        boxShadow: "0 0 0 4px black",
+        minWidth: "280px",
+        width: "min(40vw, 480px)",
         textAlign: "center",
       }}
     >
-      <h2 style={{ fontSize: "1.5rem", color: "#333", margin: 0 }}>
+      <h2 style={{ fontSize: "2.5rem", color: "black", margin: 0, fontWeight: "bold" }}>
         📚 Select a Letter
       </h2>
-      <p style={{ fontSize: "0.95rem", color: "#666", margin: 0 }}>
+      <p style={{ fontSize: "1.8rem", color: "black", margin: 0, fontWeight: "bold" }}>
         (Using Arduino Input)
       </p>
     </div>

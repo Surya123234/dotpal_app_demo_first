@@ -1,12 +1,6 @@
 import { type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
-import {
-  boxStyles,
-  buttonStyles,
-  colorSchemes,
-  typography,
-  spacing,
-} from "../styles/theme";
+import { boxStyles, buttonStyles, typography, spacing } from "../styles/theme";
 
 interface Props {
   selectedLetter: string;
@@ -54,11 +48,11 @@ export default function BrailleInput({
           right: spacing.md,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-          e.currentTarget.style.transform = "translateY(-1px)";
+          e.currentTarget.style.background = "#f0f0f0";
+          e.currentTarget.style.transform = "translate(-1px, -1px)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
+          e.currentTarget.style.background = "#ffffff";
           e.currentTarget.style.transform = "translateY(0)";
         }}
       >
@@ -67,16 +61,19 @@ export default function BrailleInput({
       <h2
         style={{
           ...typography.heading2,
-          margin: `0 0 ${spacing.sm} ${spacing.md}`,
+          color: "#000000",
+          margin: `0 0 ${spacing.lg} 0`,
           paddingTop: spacing.md,
+          textAlign: "center",
+          fontSize: "clamp(1.2rem, 3vw, 1.8rem)",
         }}
       >
-        Enter Braille dots for{" "}
+        Enter Braille for{" "}
         <span
           style={{
-            fontSize: "1.6rem",
-            fontWeight: "bold",
-            color: colorSchemes.letter.primary,
+            fontSize: "clamp(1.4rem, 3.5vw, 2rem)",
+            fontWeight: "900",
+            color: "#000000",
           }}
         >
           {selectedLetter.toUpperCase()}
@@ -87,17 +84,17 @@ export default function BrailleInput({
         onDotToggle={toggleDot}
         selectedLetter={selectedLetter}
       />
-      <div style={{ display: "flex", gap: spacing.md }}>
+      <div style={{ display: "flex", gap: spacing.lg }}>
         <button
           onClick={onSubmit}
-          style={buttonStyles.primary(colorSchemes.letter.primary)}
+          style={buttonStyles.primary()}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.letter.buttonShadowHover}`;
+            e.currentTarget.style.transform = "translate(-2px, -2px)";
+            e.currentTarget.style.boxShadow = "6px 6px 0px rgba(0,0,0,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = `0 4px 12px ${colorSchemes.letter.buttonShadow}`;
+            e.currentTarget.style.boxShadow = "4px 4px 0px rgba(0,0,0,0.3)";
           }}
         >
           ✓ Submit

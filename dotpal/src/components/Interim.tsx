@@ -18,30 +18,6 @@ export default function Interim({ mode, selectedLetter }: Props) {
     });
   }, [selectedLetter, mode]);
 
-  const getColorScheme = () => {
-    switch (mode) {
-      case "letter":
-        return {
-          letterColor: "#667eea",
-          shadowColor: "rgba(102, 126, 234, 0.2)",
-          accentColor: "#667eea",
-        };
-      case "word":
-        return {
-          letterColor: "#f5576c",
-          shadowColor: "rgba(245, 87, 108, 0.2)",
-          accentColor: "#f5576c",
-        };
-      case "dot":
-        return {
-          letterColor: "#4facfe",
-          shadowColor: "rgba(79, 172, 254, 0.2)",
-          accentColor: "#4facfe",
-        };
-    }
-  };
-
-  const colors = getColorScheme();
   const correctDots = brailleMap[selectedLetter.toLowerCase()] || [];
 
   return (
@@ -50,11 +26,10 @@ export default function Interim({ mode, selectedLetter }: Props) {
       <div
         style={{
           fontSize:
-            mode === "dot" ? "3rem" : mode === "word" ? "5rem" : "10rem",
-          fontWeight: "bold",
-          color: mode === "letter" ? "black" : colors.letterColor,
-          textShadow:
-            mode === "letter" ? "none" : `0 2px 10px ${colors.shadowColor}`,
+            mode === "dot" ? "clamp(2.5rem, 8vw, 4rem)" : mode === "word" ? "clamp(3rem, 10vw, 6rem)" : "clamp(5rem, 15vw, 10rem)",
+          fontWeight: "900",
+          color: "#000000",
+          textShadow: "none",
           animation: mode === "letter" ? "none" : "pulse 2s infinite",
         }}
       >
@@ -66,8 +41,8 @@ export default function Interim({ mode, selectedLetter }: Props) {
         <div>
           <h2
             style={{
-              ...typography.heading1,
-              color: "#333",
+              ...typography.heading2,
+              color: "#000000",
               textShadow: "none",
               margin: `0 0 ${spacing.lg} 0`,
               textAlign: "center",
@@ -76,9 +51,9 @@ export default function Interim({ mode, selectedLetter }: Props) {
             Here's the braille for{" "}
             <span
               style={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-                color: colors.accentColor,
+                fontWeight: "900",
+                fontSize: "1.8rem",
+                color: "#000000",
               }}
             >
               {selectedLetter.toUpperCase()}
@@ -94,11 +69,12 @@ export default function Interim({ mode, selectedLetter }: Props) {
       {mode === "word" && (
         <div
           style={{
-            borderRadius: "15px",
+            borderRadius: "0px",
             overflow: "hidden",
-            boxShadow: `0 8px 32px ${colors.shadowColor}`,
+            boxShadow: "0 0 0 3px #000000",
             width: "100%",
-            maxWidth: "450px",
+            maxWidth: "500px",
+            border: "3px solid #000000",
           }}
         >
           <img
@@ -107,14 +83,24 @@ export default function Interim({ mode, selectedLetter }: Props) {
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: "380px",
+              maxHeight: "400px",
               objectFit: "cover",
+              display: "block",
             }}
           />
         </div>
       )}
 
-      <p style={{ ...typography.label, margin: 0 }}>Press SUBMIT when ready</p>
+      <p
+        style={{
+          ...typography.label,
+          margin: 0,
+          color: "#000000",
+          fontSize: "1.3rem",
+        }}
+      >
+        Press SUBMIT when ready
+      </p>
 
       <style>{`
         @keyframes pulse {

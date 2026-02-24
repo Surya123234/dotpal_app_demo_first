@@ -1,45 +1,28 @@
 import type { Mode } from "./BrailleApp";
-import {
-  boxStyles,
-  buttonStyles,
-  colorSchemes,
-  typography,
-  spacing,
-} from "../styles/theme";
+import { boxStyles, buttonStyles, typography, spacing } from "../styles/theme";
 
 interface Props {
   onSelect: (mode: Mode) => void;
-  selectedMode?: Mode;
+  mode?: Mode;
 }
 
-export default function ModeSelect({ onSelect, selectedMode }: Props) {
-  const handleModeSelect = (mode: Mode) => {
-    onSelect(mode);
-    // Logic to display the corresponding dialogue and screen
+export default function ModeSelect({ onSelect, mode }: Props) {
+  const handleModeSelect = (selectedMode: Mode) => {
+    onSelect(selectedMode);
   };
 
   return (
     <div
       style={{
         ...boxStyles.cardSmall,
-        minWidth: "200px",
+        minWidth: "auto",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "stretch",
         gap: spacing.lg,
+        padding: "1.5rem",
       }}
     >
-      <h1 style={{ ...typography.heading1 }}>DotPal</h1>
-      <p style={{ ...typography.subtitle }}>Learn Braille!</p>
-      <h2
-        style={{
-          ...typography.label,
-          color: colorSchemes.letter.primary,
-          margin: `${spacing.sm} 0`,
-        }}
-      >
-        Mode
-      </h2>
       <div
         style={{
           display: "flex",
@@ -51,22 +34,24 @@ export default function ModeSelect({ onSelect, selectedMode }: Props) {
         <button
           onClick={() => handleModeSelect("letter")}
           style={{
-            ...buttonStyles.primary(colorSchemes.letter.primary),
-            ...(selectedMode === "letter"
+            ...buttonStyles.primary(),
+            ...(mode === "letter"
               ? {
-                  border: "3px solid #333",
-                  boxShadow: `0 0 20px ${colorSchemes.letter.shadow}`,
-                  transform: "scale(1.05)",
+                  border: "3px solid #000000",
+                  boxShadow: `6px 6px 0px rgba(0,0,0,0.5)`,
+                  transform: "translate(-2px, -2px)",
                 }
-              : {}),
+              : {
+                  boxShadow: `4px 4px 0px rgba(0,0,0,0.3)`,
+                }),
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.letter.shadow}`;
+            e.currentTarget.style.transform = "translate(-2px, -2px)";
+            e.currentTarget.style.boxShadow = "6px 6px 0px rgba(0,0,0,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = `0 4px 12px ${colorSchemes.letter.shadow}`;
+            e.currentTarget.style.boxShadow = "4px 4px 0px rgba(0,0,0,0.3)";
           }}
         >
           📝 Letter
@@ -74,22 +59,24 @@ export default function ModeSelect({ onSelect, selectedMode }: Props) {
         <button
           onClick={() => handleModeSelect("word")}
           style={{
-            ...buttonStyles.primary(colorSchemes.word.primary),
-            ...(selectedMode === "word"
+            ...buttonStyles.primary(),
+            ...(mode === "word"
               ? {
-                  border: "3px solid #333",
-                  boxShadow: `0 0 20px ${colorSchemes.word.shadow}`,
-                  transform: "scale(1.05)",
+                  border: "3px solid #000000",
+                  boxShadow: `6px 6px 0px rgba(0,0,0,0.5)`,
+                  transform: "translate(-2px, -2px)",
                 }
-              : {}),
+              : {
+                  boxShadow: `4px 4px 0px rgba(0,0,0,0.3)`,
+                }),
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.word.shadow}`;
+            e.currentTarget.style.transform = "translate(-2px, -2px)";
+            e.currentTarget.style.boxShadow = "6px 6px 0px rgba(0,0,0,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = `0 4px 12px ${colorSchemes.word.shadow}`;
+            e.currentTarget.style.boxShadow = "4px 4px 0px rgba(0,0,0,0.3)";
           }}
         >
           🍎 Word
@@ -97,22 +84,24 @@ export default function ModeSelect({ onSelect, selectedMode }: Props) {
         <button
           onClick={() => handleModeSelect("dot")}
           style={{
-            ...buttonStyles.primary(colorSchemes.dot.primary),
-            ...(selectedMode === "dot"
+            ...buttonStyles.primary(),
+            ...(mode === "dot"
               ? {
-                  border: "3px solid #333",
-                  boxShadow: `0 0 20px ${colorSchemes.dot.shadow}`,
-                  transform: "scale(1.05)",
+                  border: "3px solid #000000",
+                  boxShadow: `6px 6px 0px rgba(0,0,0,0.5)`,
+                  transform: "translate(-2px, -2px)",
                 }
-              : {}),
+              : {
+                  boxShadow: `4px 4px 0px rgba(0,0,0,0.3)`,
+                }),
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `0 6px 16px ${colorSchemes.dot.shadow}`;
+            e.currentTarget.style.transform = "translate(-2px, -2px)";
+            e.currentTarget.style.boxShadow = "6px 6px 0px rgba(0,0,0,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = `0 4px 12px ${colorSchemes.dot.shadow}`;
+            e.currentTarget.style.boxShadow = "4px 4px 0px rgba(0,0,0,0.3)";
           }}
         >
           ⚪ Dot

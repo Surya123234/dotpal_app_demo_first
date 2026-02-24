@@ -49,28 +49,14 @@ export default function BrailleApp() {
     };
   }, [mode, selectedLetter, showInterimScreen, feedback, dotsPressed]);
 
-  // Reset everything and go back to home
+  const defaultMode: Mode = "letter";
+
   const reset = () => {
     setSelectedLetter(null);
     setDotsPressed([]);
     setFeedback(null);
     setShowInterimScreen(false);
     setMode(null);
-  };
-
-  // Try the current letter again (reset dots and feedback, keep letter and mode)
-  const tryAgain = () => {
-    setDotsPressed([]);
-    setFeedback(null);
-    setShowInterimScreen(false);
-  };
-
-  // Move to next letter (reset letter, dots, and feedback, but keep mode)
-  const nextItem = () => {
-    setSelectedLetter(null);
-    setDotsPressed([]);
-    setFeedback(null);
-    setShowInterimScreen(false);
   };
 
   const verifyDots = () => {
@@ -187,7 +173,7 @@ export default function BrailleApp() {
     setMode(newMode);
   };
 
-  // Initialize driver on mount but don't auto-connect
+  // Initialize driver on mount and auto-connect; keep connection until unplugged
   useEffect(() => {
     const driver = new ArduinoDriver({
       onInput: handleArduinoInput,
@@ -196,18 +182,15 @@ export default function BrailleApp() {
       baudRate: 9600,
     });
     driverRef.current = driver;
+
+    // Attempt to auto-connect; if permissions are needed the browser will prompt
+    driver.connect().catch(() => {
+      /* ignore connection errors for now */
+    });
+
+    // Intentionally do not call disconnect on unmount. Keep the port open until
+    // the device is unplugged so the driver maintains a persistent connection.
   }, []);
-
-  const handleConnectArduino = async () => {
-    if (!driverRef.current) return;
-
-    try {
-      await driverRef.current.connect();
-    } catch (error) {
-      console.error("Failed to connect to Arduino:", error);
-      alert("Failed to connect to Arduino. Please try again.");
-    }
-  };
   const goHome = () => {
     // Reset UI state but keep the Arduino driver connection alive
     reset();
@@ -217,140 +200,182 @@ export default function BrailleApp() {
     <div
       style={{
         height: "100vh",
-        background: `linear-gradient(135deg, ${colorSchemes.letter.primary} 0%, ${colorSchemes.letter.secondary} 100%)`,
-        padding: spacing.lg,
+        background: "#000000",
+        padding: 0,
         margin: 0,
         display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "stretch",
+        justifyContent: "flex-start",
         width: "100%",
         overflow: "hidden",
-        gap: spacing.xl,
       }}
     >
-      {/* Sidebar Navigation */}
+      {/* Header Bar */}
       <div
         style={{
+          background: "#ffffff",
+          borderBottom: "3px solid #000000",
+          padding: "0.8rem 2rem",
           display: "flex",
-          flexDirection: "column",
-          gap: spacing.sm,
-          minWidth: "250px",
-          height: "fit-content",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
         }}
       >
-        {isConnected && (
-          <div style={boxStyles.statusIndicator(true)}>
-            <p style={{ ...typography.label, margin: 0, fontWeight: "bold" }}>
-              ✓ Arduino Connected
-            </p>
-          </div>
-        )}
-
-        {!isConnected && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: spacing.sm,
-            }}
-          >
-            <div style={boxStyles.statusIndicator(false, true)}>
-              <p style={{ ...typography.label, margin: 0, fontWeight: "bold" }}>
-                ⏳ Arduino Disconnected
-              </p>
-            </div>
-            <button
-              onClick={handleConnectArduino}
-              style={{
-                ...buttonStyles.primary,
-                backgroundColor: colorSchemes.word.primary,
-              }}
-            >
-              Select Arduino Port
-            </button>
-          </div>
-        )}
-
-        <ModeSelect selectedMode={mode || undefined} onSelect={handleModeSelect} />
-
-        <div style={{ marginTop: spacing.md }}>
-          <button onClick={goHome} style={buttonStyles.secondary}>
-            Home / Restart
-          </button>
+        <div>
+          <h1 style={{ ...typography.heading1, color: "#000000", margin: 0, fontSize: "1.8rem" }}>
+            DotPal
+          </h1>
         </div>
+        <button
+          onClick={() => driverRef.current?.connect()}
+          style={{
+            ...buttonStyles.secondary,
+            fontSize: "0.9rem",
+            padding: "0.6rem 1.2rem",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#f0f0f0";
+            e.currentTarget.style.transform = "translate(-1px, -1px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "#ffffff";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          {isConnected ? "✓ Arduino" : "Connect Arduino"}
+        </button>
       </div>
 
       {/* Main Content Area */}
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: spacing.lg,
           flex: 1,
-          height: "100%",
-          maxWidth: "800px",
+          width: "100%",
+          gap: 0,
+          overflow: "hidden",
         }}
       >
-        {/* Letter select for all modes */}
-        {mode && !selectedLetter && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "column",
-              gap: spacing.lg,
-            }}
-          >
-            <LetterSelect />
-            <p
+        {/* Left Sidebar - Mode Selection */}
+        <div
+          style={{
+            background: "#ffffff",
+            borderRight: "3px solid #000000",
+            padding: "1.5rem",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            alignItems: "stretch",
+            minWidth: "320px",
+            width: "clamp(280px, 28vw, 380px)",
+            overflowY: "auto",
+            gap: spacing.lg,
+          }}
+        >
+          {!mode && (
+            <ModeSelect mode={defaultMode} onSelect={handleModeSelect} />
+          )}
+          {mode && <ModeSelect mode={mode} onSelect={handleModeSelect} />}
+        </div>
+
+        {/* Right Main Content */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: spacing.xl,
+            padding: "clamp(1.5rem, 5vw, 3rem)",
+            overflowY: "auto",
+            background: "#000000",
+          }}
+        >
+          {/* Mode selection prompt */}
+          {!mode && (
+            <div
               style={{
-                ...typography.heading1,
-                color: "white",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: spacing.xl,
               }}
             >
-              Waiting for Arduino letter input...
-            </p>
-          </div>
-        )}
+              <p
+                style={{
+                  ...typography.heading2,
+                  color: "#ffffff",
+                  fontSize: "clamp(1.5rem, 4vw, 2rem)",
+                }}
+              >
+                Select a learning mode to begin
+              </p>
+            </div>
+          )}
 
-        {/* Interim screens for each mode */}
-        {mode && selectedLetter && showInterimScreen && !feedback && (
-          <Interim mode={mode} selectedLetter={selectedLetter} />
-        )}
+          {/* Letter select for all modes */}
+          {mode && !selectedLetter && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "column",
+                gap: spacing.lg,
+              }}
+            >
+              <LetterSelect />
+              <p
+                style={{
+                  ...typography.heading2,
+                  color: "#ffffff",
+                  fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
+                }}
+              >
+                Waiting for Arduino letter input...
+              </p>
+            </div>
+          )}
 
-        {/* Braille input for all modes */}
-        {mode && selectedLetter && !showInterimScreen && !feedback && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: spacing.sm,
-            }}
-          >
-            <BrailleInput
+          {/* Interim screens for each mode */}
+          {mode && selectedLetter && showInterimScreen && !feedback && (
+            <Interim mode={mode} selectedLetter={selectedLetter} />
+          )}
+
+          {/* Braille input for all modes */}
+          {mode && selectedLetter && !showInterimScreen && !feedback && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: spacing.lg,
+                maxWidth: "clamp(600px, 85vw, 1000px)",
+                width: "100%",
+              }}
+            >
+              <BrailleInput
+                selectedLetter={selectedLetter || ""}
+                dotsPressed={dotsPressed}
+                setDotsPressed={setDotsPressed}
+                onSubmit={verifyDots}
+                onBack={() => setShowInterimScreen(true)}
+              />
+            </div>
+          )}
+
+          {feedback && (
+            <Feedback
+              feedback={feedback}
               selectedLetter={selectedLetter || ""}
-              dotsPressed={dotsPressed}
-              setDotsPressed={setDotsPressed}
-              onSubmit={verifyDots}
-              onBack={() => setShowInterimScreen(true)}
+              reset={reset}
+              selectedMode={mode || ""}
             />
-          </div>
-        )}
-
-        {feedback && (
-          <Feedback
-            feedback={feedback}
-            selectedLetter={selectedLetter || ""}
-            tryAgain={tryAgain}
-            nextItem={nextItem}
-            selectedMode={mode || ""}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
