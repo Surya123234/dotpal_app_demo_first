@@ -6,17 +6,21 @@ import { typography, spacing } from "../styles/theme";
 interface Props {
   mode: "letter" | "word" | "dot";
   selectedLetter: string;
+  onAudioEnd?: () => void;
 }
 
-export default function Interim({ mode, selectedLetter }: Props) {
+export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
   // Load audio based on mode
   useEffect(() => {
     const audioPath = `/audios/${mode}_mode_${selectedLetter.toLowerCase()}.mp3`;
     const audio = new Audio(audioPath);
+    audio.addEventListener("ended", () => {
+      onAudioEnd?.();
+    });
     audio.play().catch(() => {
       /* ignore play errors */
     });
-  }, [selectedLetter, mode]);
+  }, [selectedLetter, mode, onAudioEnd]);
 
   const correctDots = brailleMap[selectedLetter.toLowerCase()] || [];
 

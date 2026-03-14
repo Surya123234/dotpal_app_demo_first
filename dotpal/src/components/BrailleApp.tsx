@@ -139,17 +139,6 @@ export default function BrailleApp() {
 
     // Handle submit button
     if (event.type === "submit") {
-      // If on interim screen, confirm it
-      if (
-        currentMode &&
-        currentSelectedLetter &&
-        currentShowInterimScreen &&
-        !currentFeedback
-      ) {
-        setShowInterimScreen(false);
-        return;
-      }
-
       // If on braille input screen, verify the dots
       if (
         currentMode &&
@@ -427,7 +416,11 @@ export default function BrailleApp() {
 
           {/* Interim screens for each mode */}
           {mode && selectedLetter && showInterimScreen && !feedback && (
-            <Interim mode={mode} selectedLetter={selectedLetter} />
+            <Interim
+              mode={mode}
+              selectedLetter={selectedLetter}
+              onAudioEnd={() => setShowInterimScreen(false)}
+            />
           )}
 
           {/* Braille input for all modes */}
