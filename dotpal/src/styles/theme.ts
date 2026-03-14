@@ -68,7 +68,7 @@ export const boxStyles = {
 
 // Button Styles
 export const buttonStyles = {
-  primary: (color: string = "#000000") => ({
+  primary: () => ({
     padding: "1rem 2rem",
     fontSize: "1.1rem",
     fontWeight: "bold" as const,

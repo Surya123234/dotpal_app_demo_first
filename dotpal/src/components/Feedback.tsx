@@ -16,7 +16,6 @@ export default function Feedback({
   feedback,
   selectedLetter,
   selectedMode,
-  reset,
   onTryAgain,
   onNext,
 }: Props) {

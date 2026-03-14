@@ -6,13 +6,7 @@ import BrailleInput from "./BrailleInput";
 import Feedback from "./Feedback";
 import Interim from "./Interim";
 import { brailleMap, type BrailleDot } from "../braille";
-import {
-  colorSchemes,
-  boxStyles,
-  spacing,
-  typography,
-  buttonStyles,
-} from "../styles/theme";
+import { spacing, typography, buttonStyles } from "../styles/theme";
 
 export type Mode = "letter" | "word" | "dot";
 
@@ -199,10 +193,6 @@ export default function BrailleApp() {
     // Intentionally do not call disconnect on unmount. Keep the port open until
     // the device is unplugged so the driver maintains a persistent connection.
   }, []);
-  const goHome = () => {
-    // Reset UI state but keep the Arduino driver connection alive
-    reset();
-  };
 
   return (
     <div
