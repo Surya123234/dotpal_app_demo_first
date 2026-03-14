@@ -30,6 +30,8 @@ export class ArduinoDriver {
   private buffer = "";
   private isConnected = false;
   private options: ArduinoDriverOptions;
+  private lastEventTimes: Map<string, number> = new Map();
+  private readonly DEBOUNCE_MS = 1000;
 
   constructor(options: ArduinoDriverOptions = {}) {
     this.options = options;
@@ -164,6 +166,26 @@ export class ArduinoDriver {
           if (!trimmed) continue;
 
           const event = this.parseInput(trimmed);
+
+          // Debounce consecutive events within 1 second
+          const now = Date.now();
+          let eventKey: string;
+          if (event.type === "letter") {
+            eventKey = `letter_${event.value}`;
+          } else if (event.type === "dot") {
+            eventKey = `dot_${event.dot}_${event.pressed ? "press" : "release"}`;
+          } else if (event.type === "submit") {
+            eventKey = "submit";
+          } else {
+            eventKey = "raw";
+          }
+
+          const lastTime = this.lastEventTimes.get(eventKey) || 0;
+          if (now - lastTime < this.DEBOUNCE_MS) {
+            continue; // Skip this event
+          }
+          this.lastEventTimes.set(eventKey, now);
+
           this.options.onInput?.(event);
         }
       }
