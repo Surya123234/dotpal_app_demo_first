@@ -243,6 +243,39 @@ export default function BrailleApp() {
           );
         }
       }
+
+      // Also track dot presses during interim screen
+      if (
+        currentMode &&
+        currentSelectedLetter &&
+        currentShowInterimScreen &&
+        !currentFeedback
+      ) {
+        const dot = event.dot as BrailleDot;
+        if (event.pressed) {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev : [...prev, dot],
+          );
+        } else {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev.filter((d) => d !== dot) : prev,
+          );
+        }
+      }
+
+      // Also track dot presses on home screen (letter selection)
+      if (currentMode && !currentSelectedLetter && !currentFeedback) {
+        const dot = event.dot as BrailleDot;
+        if (event.pressed) {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev : [...prev, dot],
+          );
+        } else {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev.filter((d) => d !== dot) : prev,
+          );
+        }
+      }
       return;
     }
 
