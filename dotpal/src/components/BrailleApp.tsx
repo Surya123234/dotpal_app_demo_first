@@ -7,6 +7,7 @@ import Feedback from "./Feedback";
 import Interim from "./Interim";
 import { brailleMap, type BrailleDot } from "../braille";
 import { spacing, typography, buttonStyles } from "../styles/theme";
+import { supabase } from "../supabase";
 
 export type Mode = "letter" | "word" | "dot";
 
@@ -22,7 +23,12 @@ export default function BrailleApp() {
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null);
   const [showInterimScreen, setShowInterimScreen] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [waitingForReset, setWaitingForReset] = useState<boolean>(false);
+  const [pendingLetterSelection, setPendingLetterSelection] = useState<
+    string | null
+  >(null);
   const driverRef = useRef<ArduinoDriver | null>(null);
+  const resetAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Ref to store current state for use in the input handler
   const stateRef = useRef({
@@ -31,6 +37,8 @@ export default function BrailleApp() {
     showInterimScreen,
     feedback,
     dotsPressed,
+    waitingForReset,
+    pendingLetterSelection,
   });
 
   useEffect(() => {
@@ -40,29 +48,20 @@ export default function BrailleApp() {
       showInterimScreen,
       feedback,
       dotsPressed,
+      waitingForReset,
+      pendingLetterSelection,
     };
-  }, [mode, selectedLetter, showInterimScreen, feedback, dotsPressed]);
+  }, [
+    mode,
+    selectedLetter,
+    showInterimScreen,
+    feedback,
+    dotsPressed,
+    waitingForReset,
+    pendingLetterSelection,
+  ]);
 
   const defaultMode: Mode = "letter";
-
-  const getRandomLetter = (): string => {
-    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
-    return letters[Math.floor(Math.random() * letters.length)];
-  };
-
-  const selectRandomLetter = () => {
-    const newLetter = getRandomLetter();
-    setSelectedLetter(newLetter);
-    setDotsPressed([]);
-    setFeedback(null);
-    setShowInterimScreen(true);
-  };
-
-  const tryAgain = () => {
-    setDotsPressed([]);
-    setFeedback(null);
-    setShowInterimScreen(false);
-  };
 
   const reset = () => {
     setSelectedLetter(null);
@@ -70,6 +69,35 @@ export default function BrailleApp() {
     setFeedback(null);
     setShowInterimScreen(false);
     setMode(null);
+    setWaitingForReset(false);
+    setPendingLetterSelection(null);
+  };
+
+  const playResetAudio = () => {
+    // Don't overlap: if reset audio is already playing, skip
+    const existing = resetAudioRef.current;
+    if (existing && !existing.paused && !existing.ended) return;
+
+    const audioData = supabase.storage
+      .from("media")
+      .getPublicUrl(`audio/reset_dots.mp3`);
+    const audio = new Audio(audioData.data.publicUrl);
+    resetAudioRef.current = audio;
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
+  };
+
+  const stopResetAudio = () => {
+    if (resetAudioRef.current) {
+      resetAudioRef.current.pause();
+      resetAudioRef.current.currentTime = 0;
+      resetAudioRef.current = null;
+    }
+  };
+
+  const checkDotsReset = (currentDotsPressed: BrailleDot[]) => {
+    return currentDotsPressed.length === 0;
   };
 
   const verifyDots = () => {
@@ -98,19 +126,106 @@ export default function BrailleApp() {
       showInterimScreen: currentShowInterimScreen,
       feedback: currentFeedback,
       dotsPressed: currentDotsPressed,
+      waitingForReset: currentWaitingForReset,
     } = stateRef.current;
 
     // Handle letter selection
     if (event.type === "letter") {
+      // If waiting for reset, check if dots are reset
+      if (currentWaitingForReset) {
+        if (checkDotsReset(currentDotsPressed)) {
+          // Dots are reset, proceed with letter selection
+          stopResetAudio();
+          setWaitingForReset(false);
+          if (currentMode && !currentSelectedLetter) {
+            setSelectedLetter(event.value);
+            setShowInterimScreen(true);
+          } else if (currentMode) {
+            // Allow selecting new letter after reset
+            setSelectedLetter(event.value);
+            setDotsPressed([]);
+            setFeedback(null);
+            setShowInterimScreen(true);
+          }
+        } else {
+          // Dots not reset, play reset audio again
+          playResetAudio();
+        }
+        return;
+      }
+
+      // If currently in a flow (has mode and selectedLetter), check if reset is needed
+      if (currentMode && currentSelectedLetter && !currentWaitingForReset) {
+        if (checkDotsReset(currentDotsPressed)) {
+          // Dots already clear — go straight to the new letter
+          setSelectedLetter(event.value);
+          setDotsPressed([]);
+          setFeedback(null);
+          setShowInterimScreen(true);
+        } else {
+          // Dots not clear — play reset audio and wait; user must press the letter again
+          playResetAudio();
+          stateRef.current.waitingForReset = true;
+          setWaitingForReset(true);
+        }
+        return;
+      }
+
+      // Normal letter selection when no mode/letter selected
       if (currentMode && !currentSelectedLetter) {
-        setSelectedLetter(event.value);
-        setShowInterimScreen(true);
+        if (checkDotsReset(currentDotsPressed)) {
+          setSelectedLetter(event.value);
+          setShowInterimScreen(true);
+        } else {
+          // Dots raised — require reset before entering a letter
+          playResetAudio();
+          stateRef.current.waitingForReset = true;
+          setWaitingForReset(true);
+        }
       }
       return;
     }
 
     // Handle dot press/release
     if (event.type === "dot") {
+      // If waiting for reset, check if this completes the reset
+      if (currentWaitingForReset) {
+        const dot = event.dot as BrailleDot;
+        if (event.pressed) {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev : [...prev, dot],
+          );
+        } else {
+          setDotsPressed((prev) =>
+            prev.includes(dot) ? prev.filter((d) => d !== dot) : prev,
+          );
+        }
+        // Check if dots are now reset
+        setTimeout(() => {
+          const updatedDots = stateRef.current.dotsPressed;
+          const latestFeedback = stateRef.current.feedback;
+          if (checkDotsReset(updatedDots)) {
+            stopResetAudio();
+            setWaitingForReset(false);
+            if (latestFeedback?.correct) {
+              // Correct feedback: go back to letter selection so user can pick a new letter
+              setSelectedLetter(null);
+              setDotsPressed([]);
+              setFeedback(null);
+              setShowInterimScreen(false);
+            } else if (latestFeedback && !latestFeedback.correct) {
+              // Incorrect feedback: go back to braille input to try again
+              setDotsPressed([]);
+              setFeedback(null);
+              setShowInterimScreen(false);
+            }
+            // No feedback case: just clear waitingForReset so user can press the letter again
+          }
+        }, 100);
+        return;
+      }
+
+      // Normal dot input during braille input phase
       if (
         currentMode &&
         currentSelectedLetter &&
@@ -133,6 +248,24 @@ export default function BrailleApp() {
 
     // Handle submit button
     if (event.type === "submit") {
+      // If waiting for reset, check if dots are reset
+      if (currentWaitingForReset) {
+        if (checkDotsReset(currentDotsPressed)) {
+          stopResetAudio();
+          setWaitingForReset(false);
+          if (currentFeedback) {
+            // After feedback, allow trying again / go back to letter selection
+            setDotsPressed([]);
+            setFeedback(null);
+            setShowInterimScreen(false);
+          }
+        } else {
+          // Dots not reset, play reset audio again
+          playResetAudio();
+        }
+        return;
+      }
+
       // If on braille input screen, verify the dots
       if (
         currentMode &&
@@ -168,6 +301,23 @@ export default function BrailleApp() {
   };
 
   const handleModeSelect = (newMode: Mode) => {
+    // If currently in a flow, require reset first
+    if (mode && selectedLetter && !waitingForReset) {
+      playResetAudio();
+      setWaitingForReset(true);
+      // Store the pending mode change
+      setTimeout(() => {
+        setMode(newMode);
+        setSelectedLetter(null);
+        setDotsPressed([]);
+        setFeedback(null);
+        setShowInterimScreen(false);
+        setWaitingForReset(false);
+        setPendingLetterSelection(null);
+      }, 1000);
+      return;
+    }
+
     setSelectedLetter(null);
     setDotsPressed([]);
     setFeedback(null);
@@ -350,11 +500,13 @@ export default function BrailleApp() {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: spacing.xl,
-            padding: "clamp(1.5rem, 5vw, 3rem)",
-            overflowY: "auto",
+            alignItems: feedback || showInterimScreen ? "stretch" : "center",
+            justifyContent:
+              feedback || showInterimScreen ? "stretch" : "center",
+            gap: feedback || showInterimScreen ? 0 : spacing.xl,
+            padding:
+              feedback || showInterimScreen ? 0 : "clamp(1.5rem, 5vw, 3rem)",
+            overflowY: "hidden",
             background: "#000000",
           }}
         >
@@ -436,14 +588,17 @@ export default function BrailleApp() {
           )}
 
           {feedback && (
-            <Feedback
-              feedback={feedback}
-              selectedLetter={selectedLetter || ""}
-              reset={reset}
-              onTryAgain={tryAgain}
-              onNext={selectRandomLetter}
-              selectedMode={mode || ""}
-            />
+            <div style={{ flex: 1, display: "flex", alignSelf: "stretch" }}>
+              <Feedback
+                feedback={feedback}
+                selectedLetter={selectedLetter || ""}
+                selectedMode={mode || ""}
+                onAudioEnd={() => {
+                  playResetAudio();
+                  setWaitingForReset(true);
+                }}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -1,24 +1,20 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import type { FeedbackResult } from "./BrailleApp";
 import BrailleCell from "./BrailleCell";
-import { boxStyles, buttonStyles, typography } from "../styles/theme";
+import { boxStyles, typography } from "../styles/theme";
 import { supabase } from "../supabase";
 
 interface Props {
   feedback: FeedbackResult;
   selectedLetter: string;
   selectedMode: string;
-  reset: () => void;
-  onTryAgain: () => void;
-  onNext: () => void;
+  onAudioEnd?: () => void;
 }
 
 export default function Feedback({
   feedback,
   selectedLetter,
-  selectedMode,
-  onTryAgain,
-  onNext,
+  onAudioEnd,
 }: Props) {
   useEffect(() => {
     const audioName = feedback.correct
@@ -28,46 +24,52 @@ export default function Feedback({
       .from("media")
       .getPublicUrl(`audio/${audioName}.mp3`);
     const audio = new Audio(audioData.data.publicUrl);
-    audio.play().catch(() => {
-      /* ignore play errors */
+    audio.addEventListener("ended", () => {
+      onAudioEnd?.();
     });
-  }, [feedback.correct]);
+    audio.play().catch(() => {
+      onAudioEnd?.();
+    });
+  }, [feedback.correct, onAudioEnd]);
+
+  const cardStyle: React.CSSProperties = {
+    ...boxStyles.card,
+    flex: 1,
+    alignSelf: "stretch" as const,
+    maxHeight: "none",
+    overflowY: "hidden" as const,
+    justifyContent: "center",
+    gap: "clamp(0.5rem, 2vh, 1.5rem)",
+    padding: "clamp(1rem, 3vh, 2rem) clamp(1rem, 3vw, 2rem)",
+  };
 
   return (
-    <div style={boxStyles.card}>
+    <div style={cardStyle}>
       {feedback.correct ? (
         <>
           <h2
             style={{
               ...typography.heading1,
               color: "#000000",
-              fontSize: "2.5rem",
+              fontSize: "clamp(2rem, 5vw, 3rem)",
+              margin: 0,
             }}
           >
             ✅ Correct!
           </h2>
-          <p style={{ ...typography.heading2, color: "#000000" }}>
-            Great job! You got it right!
-          </p>
-          <button
-            onClick={onNext}
-            style={buttonStyles.primary()}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translate(-2px, -2px)";
-              e.currentTarget.style.boxShadow = "6px 6px 0px black";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "4px 4px 0px black";
+          <p
+            style={{
+              ...typography.heading2,
+              color: "#000000",
+              fontSize: "clamp(1.2rem, 3vw, 1.8rem)",
+              margin: 0,
             }}
           >
-            Next{" "}
-            {selectedMode === "letter"
-              ? "Letter"
-              : selectedMode === "word"
-                ? "Word"
-                : "Dot"}
-          </button>
+            Great job! You got it right!
+          </p>
+          <p style={{ ...typography.label, color: "#000000", margin: 0 }}>
+            Please reset all dots to continue.
+          </p>
         </>
       ) : (
         <>
@@ -75,7 +77,8 @@ export default function Feedback({
             style={{
               ...typography.heading1,
               color: "#000000",
-              fontSize: "2.5rem",
+              fontSize: "clamp(2rem, 5vw, 3rem)",
+              margin: 0,
             }}
           >
             ❌ Not Quite!
@@ -84,31 +87,21 @@ export default function Feedback({
             style={{
               ...typography.heading2,
               color: "#000000",
-              margin: "0",
+              margin: 0,
+              fontSize: "clamp(1.2rem, 3vw, 1.8rem)",
             }}
           >
             Correct dots for <strong>{selectedLetter.toUpperCase()}</strong>:
           </p>
-          <div style={{ margin: "0" }}>
+          <div style={{ margin: 0, flexShrink: 0 }}>
             <BrailleCell
               selectedLetter={selectedLetter}
               correctDots={feedback.correctDots}
             />
           </div>
-          <button
-            onClick={onTryAgain}
-            style={buttonStyles.primary()}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translate(-2px, -2px)";
-              e.currentTarget.style.boxShadow = "6px 6px 0px black";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "4px 4px 0px black";
-            }}
-          >
-            Try Again
-          </button>
+          <p style={{ ...typography.label, color: "#000000", margin: 0 }}>
+            Please reset all dots to try again.
+          </p>
         </>
       )}
     </div>

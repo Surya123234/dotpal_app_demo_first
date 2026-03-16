@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { brailleMap, type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
 import { typography } from "../styles/theme";
@@ -11,6 +11,9 @@ interface Props {
 }
 
 export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
+
   // Load audio based on mode
   useEffect(() => {
     const audioData = supabase.storage
@@ -24,36 +27,45 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
       /* ignore play errors */
       console.log("Audio play error:", e);
     });
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
   }, [selectedLetter, mode, onAudioEnd]);
 
+  // Preload image for word mode
+  useEffect(() => {
+    if (mode === "word") {
+      setImageLoaded(false);
+      const imageData = supabase.storage
+        .from("media")
+        .getPublicUrl(
+          `images/word_mode_picture_${selectedLetter.toLowerCase()}.jpeg`,
+        );
+      setImageUrl(imageData.data.publicUrl);
+    }
+  }, [selectedLetter, mode]);
+
   const correctDots = brailleMap[selectedLetter.toLowerCase()] || [];
-  const imageData =
-    mode === "word"
-      ? supabase.storage
-          .from("media")
-          .getPublicUrl(
-            `images/word_mode_picture_${selectedLetter.toLowerCase()}.jpeg`,
-          )
-      : null;
 
   return (
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        gap: "0.2rem",
-        padding: "clamp(1rem, 2.5vw, 1.5rem)",
+        flexDirection: mode === "word" ? "row" : "column",
+        alignItems: mode === "word" ? "stretch" : "center",
+        justifyContent: mode === "word" ? "flex-start" : "center",
+        gap: mode === "word" ? "clamp(0.5rem, 1vw, 1rem)" : "0.2rem",
+        padding:
+          mode === "word"
+            ? "clamp(0.5rem, 1vw, 1rem)"
+            : "clamp(1.5rem, 3vw, 2.5rem)",
         background: "#ffffff",
         borderRadius: "0px",
         boxShadow: "0 0 0 2px #000000",
-        maxWidth: "100%",
-        width: "100%",
-        height: "fit-content",
-        maxHeight: "90vh",
-        overflowY: "auto",
-        overflowX: "hidden",
+        flex: 1,
+        alignSelf: "stretch",
+        overflow: "hidden",
       }}
     >
       {/* Letter display */}
@@ -63,31 +75,53 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
             mode === "dot"
               ? "clamp(2rem, 5vw, 3rem)"
               : mode === "word"
-                ? "clamp(2.5rem, 6vw, 4rem)"
-                : "clamp(5rem, 14vw, 8rem)",
+                ? "clamp(3rem, 8vw, 8rem)"
+                : "clamp(8rem, 20vw, 14rem)",
           fontWeight: "900",
           color: "#000000",
           textShadow: "none",
           animation: mode === "letter" ? "none" : "pulse 2s infinite",
           margin: 0,
+          flexShrink: 0,
+          flex: mode === "word" ? "0 0 auto" : undefined,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {mode === "letter" && selectedLetter.toUpperCase()}
-        {mode === "word" && (
-          <div>
-            {selectedLetter.toUpperCase()}
-            <img
-              src={imageData?.data.publicUrl}
-              alt={selectedLetter}
-              style={{
-                height: "clamp(2.5rem, 6vw, 4rem)",
-                width: "auto",
-                objectFit: "contain",
-              }}
-            />
-          </div>
-        )}
+        {mode === "word" && selectedLetter.toUpperCase()}
       </div>
+
+      {/* Word mode: big image to the right */}
+      {mode === "word" && (
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            maxWidth: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: imageLoaded ? "transparent" : "#f0f0f0",
+          }}
+        >
+          <img
+            src={imageUrl}
+            alt={selectedLetter}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(true)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              opacity: imageLoaded ? 1 : 0,
+              transition: "opacity 0.2s ease-in",
+            }}
+          />
+        </div>
+      )}
 
       {/* Mode-specific content */}
       {mode === "dot" && (
@@ -138,17 +172,6 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
           </div>
         </div>
       )}
-
-      <p
-        style={{
-          ...typography.label,
-          margin: 0,
-          color: "#000000",
-          fontSize: "clamp(0.9rem, 1.8vw, 1rem)",
-        }}
-      >
-        Press SUBMIT
-      </p>
 
       <style>{`
         @keyframes pulse {

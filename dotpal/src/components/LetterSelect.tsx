@@ -1,6 +1,19 @@
+import { useEffect } from "react";
+import { supabase } from "../supabase";
+
 interface Props {}
 
 export default function LetterSelect({}: Props) {
+  useEffect(() => {
+    const audioData = supabase.storage
+      .from("media")
+      .getPublicUrl(`audio/select_letter.mp3`);
+    const audio = new Audio(audioData.data.publicUrl);
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
+  }, []);
+
   return (
     <div
       style={{
