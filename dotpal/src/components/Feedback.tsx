@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { FeedbackResult } from "./BrailleApp";
 import BrailleCell from "./BrailleCell";
 import { boxStyles, buttonStyles, typography } from "../styles/theme";
+import { supabase } from "../supabase";
 
 interface Props {
   feedback: FeedbackResult;
@@ -20,11 +21,15 @@ export default function Feedback({
   onNext,
 }: Props) {
   useEffect(() => {
-    const audio = new Audio(
-      feedback.correct ? "/audios/yay.mp3" : "/audios/wrong.mp3",
-    );
+    const audioName = feedback.correct
+      ? "correct_attempt"
+      : "incorrect_attempt";
+    const audioData = supabase.storage
+      .from("media")
+      .getPublicUrl(`audio/${audioName}.mp3`);
+    const audio = new Audio(audioData.data.publicUrl);
     audio.play().catch(() => {
-      /* ignore play errors (autoplay policy, etc.) */
+      /* ignore play errors */
     });
   }, [feedback.correct]);
 

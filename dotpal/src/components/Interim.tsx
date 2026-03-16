@@ -15,13 +15,14 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
   useEffect(() => {
     const audioData = supabase.storage
       .from("media")
-      .getPublicUrl(`audios/${mode}_mode_${selectedLetter.toLowerCase()}.mp3`);
+      .getPublicUrl(`audio/${mode}_mode_${selectedLetter.toLowerCase()}.mp3`);
     const audio = new Audio(audioData.data.publicUrl);
     audio.addEventListener("ended", () => {
       onAudioEnd?.();
     });
-    audio.play().catch(() => {
+    audio.play().catch((e) => {
       /* ignore play errors */
+      console.log("Audio play error:", e);
     });
   }, [selectedLetter, mode, onAudioEnd]);
 
@@ -73,15 +74,18 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
       >
         {mode === "letter" && selectedLetter.toUpperCase()}
         {mode === "word" && (
-          <img
-            src={imageData?.data.publicUrl}
-            alt={selectedLetter}
-            style={{
-              height: "clamp(2.5rem, 6vw, 4rem)",
-              width: "auto",
-              objectFit: "contain",
-            }}
-          />
+          <div>
+            {selectedLetter.toUpperCase()}
+            <img
+              src={imageData?.data.publicUrl}
+              alt={selectedLetter}
+              style={{
+                height: "clamp(2.5rem, 6vw, 4rem)",
+                width: "auto",
+                objectFit: "contain",
+              }}
+            />
+          </div>
         )}
       </div>
 
