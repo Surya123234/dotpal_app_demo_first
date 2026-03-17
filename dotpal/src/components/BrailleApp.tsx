@@ -30,6 +30,7 @@ export default function BrailleApp() {
   const driverRef = useRef<ArduinoDriver | null>(null);
   const resetAudioRef = useRef<HTMLAudioElement | null>(null);
   const interimAudioRef = useRef<HTMLAudioElement | null>(null);
+  const pendingModeRef = useRef<Mode | null>(null);
 
   // Ref to store current state for use in the input handler
   const stateRef = useRef({
@@ -208,6 +209,18 @@ export default function BrailleApp() {
           if (checkDotsReset(updatedDots)) {
             stopResetAudio();
             setWaitingForReset(false);
+            // If a mode switch was pending (triggered from interim screen), apply it now
+            if (pendingModeRef.current !== null) {
+              const pendingMode = pendingModeRef.current;
+              pendingModeRef.current = null;
+              setMode(pendingMode);
+              setSelectedLetter(null);
+              setDotsPressed([]);
+              setFeedback(null);
+              setShowInterimScreen(false);
+              setPendingLetterSelection(null);
+              return;
+            }
             if (latestFeedback?.correct) {
               // Correct feedback: go back to letter selection so user can pick a new letter
               setSelectedLetter(null);
@@ -359,13 +372,20 @@ export default function BrailleApp() {
         switchMode();
       } else {
         // Dots are raised — play reset audio, then switch mode after it ends
+          pendingModeRef.current = newMode;
         const audioData = supabase.storage
           .from("media")
           .getPublicUrl(`audio/reset_dots.mp3`);
         const audio = new Audio(audioData.data.publicUrl);
         resetAudioRef.current = audio;
         setWaitingForReset(true);
-        audio.onended = switchMode;
+        audio.onended = () => {
+          // Only switch if the dot-reset handler hasn't already consumed pendingModeRef
+          if (pendingModeRef.current !== null) {
+            pendingModeRef.current = null;
+            switchMode();
+          }
+        };
         audio.play().catch(() => {
           /* ignore play errors */
         });
