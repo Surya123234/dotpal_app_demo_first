@@ -32,6 +32,8 @@ export default function BrailleApp() {
   const interimAudioRef = useRef<HTMLAudioElement | null>(null);
   const pendingModeRef = useRef<Mode | null>(null);
   const startupSelectGameAudioRef = useRef<HTMLAudioElement | null>(null);
+  const hasPlayedStartupAudioRef = useRef(false);
+  const startupAudioDelayTimerRef = useRef<number | null>(null);
 
   // Ref to store current state for use in the input handler
   const stateRef = useRef({
@@ -110,6 +112,10 @@ export default function BrailleApp() {
   };
 
   const stopStartupAudio = () => {
+    if (startupAudioDelayTimerRef.current !== null) {
+      window.clearTimeout(startupAudioDelayTimerRef.current);
+      startupAudioDelayTimerRef.current = null;
+    }
     if (startupSelectGameAudioRef.current) {
       startupSelectGameAudioRef.current.onended = null;
       startupSelectGameAudioRef.current.pause();
@@ -117,6 +123,52 @@ export default function BrailleApp() {
       startupSelectGameAudioRef.current = null;
     }
     stopResetAudio();
+  };
+
+  const playStartupAudioSequence = () => {
+    if (hasPlayedStartupAudioRef.current) return;
+
+    const selectGameUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/select_game.mp3").data.publicUrl;
+    const resetDotsUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/reset_dots.mp3").data.publicUrl;
+
+    const selectGameAudio = new Audio(selectGameUrl);
+    hasPlayedStartupAudioRef.current = true;
+    startupSelectGameAudioRef.current = selectGameAudio;
+
+    selectGameAudio.onended = () => {
+      startupSelectGameAudioRef.current = null;
+      // If user already picked a mode, skip startup reset prompt.
+      if (stateRef.current.mode) return;
+      const resetAudio = new Audio(resetDotsUrl);
+      resetAudioRef.current = resetAudio;
+      resetAudio.onended = () => {
+        if (resetAudioRef.current === resetAudio) {
+          resetAudioRef.current = null;
+        }
+      };
+      resetAudio.play().catch(() => {
+        /* ignore play errors */
+      });
+    };
+
+    selectGameAudio.play().catch(() => {
+      // If blocked unexpectedly, allow retry on the next connect click.
+      hasPlayedStartupAudioRef.current = false;
+    });
+  };
+
+  const scheduleStartupAudioSequence = () => {
+    if (hasPlayedStartupAudioRef.current) return;
+    if (startupAudioDelayTimerRef.current !== null) return;
+
+    startupAudioDelayTimerRef.current = window.setTimeout(() => {
+      startupAudioDelayTimerRef.current = null;
+      playStartupAudioSequence();
+    }, 1000);
   };
 
   const checkDotsReset = (currentDotsPressed: BrailleDot[]) => {
@@ -430,36 +482,8 @@ export default function BrailleApp() {
     setMode(newMode);
   };
 
-  // Play welcome audio sequence on first load: select_game → reset_dots
+  // Cleanup startup audio on unmount
   useEffect(() => {
-    const selectGameUrl = supabase.storage
-      .from("media")
-      .getPublicUrl("audio/select_game.mp3").data.publicUrl;
-    const resetDotsUrl = supabase.storage
-      .from("media")
-      .getPublicUrl("audio/reset_dots.mp3").data.publicUrl;
-
-    const selectGameAudio = new Audio(selectGameUrl);
-    startupSelectGameAudioRef.current = selectGameAudio;
-    selectGameAudio.onended = () => {
-      startupSelectGameAudioRef.current = null;
-      // If user already picked a mode, skip startup reset prompt.
-      if (stateRef.current.mode) return;
-      const resetAudio = new Audio(resetDotsUrl);
-      resetAudioRef.current = resetAudio;
-      resetAudio.onended = () => {
-        if (resetAudioRef.current === resetAudio) {
-          resetAudioRef.current = null;
-        }
-      };
-      resetAudio.play().catch(() => {
-        /* ignore play errors */
-      });
-    };
-    selectGameAudio.play().catch(() => {
-      /* ignore play errors */
-    });
-
     return () => {
       stopStartupAudio();
     };
@@ -469,7 +493,10 @@ export default function BrailleApp() {
   useEffect(() => {
     const driver = new ArduinoDriver({
       onInput: handleArduinoInput,
-      onConnect: () => setIsConnected(true),
+      onConnect: () => {
+        setIsConnected(true);
+        scheduleStartupAudioSequence();
+      },
       onDisconnect: () => setIsConnected(false),
       baudRate: 9600,
     });
@@ -524,7 +551,9 @@ export default function BrailleApp() {
           </h1>
         </div>
         <button
-          onClick={() => driverRef.current?.connect()}
+          onClick={() => {
+            driverRef.current?.connect();
+          }}
           style={{
             ...buttonStyles.secondary,
             fontSize: "0.9rem",
