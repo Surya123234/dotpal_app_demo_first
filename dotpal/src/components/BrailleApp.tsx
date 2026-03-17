@@ -91,6 +91,16 @@ export default function BrailleApp() {
     });
   };
 
+  const playButtonSelectAudio = () => {
+    const audioUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/button_select.mp3").data.publicUrl;
+    const audio = new Audio(audioUrl);
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
+  };
+
   const stopResetAudio = () => {
     if (resetAudioRef.current) {
       resetAudioRef.current.pause();
@@ -201,6 +211,10 @@ export default function BrailleApp() {
 
     // Handle dot press/release
     if (event.type === "dot") {
+      if (event.pressed) {
+        playButtonSelectAudio();
+      }
+
       // If waiting for reset, check if this completes the reset
       if (currentWaitingForReset) {
         const dot = event.dot as BrailleDot;
