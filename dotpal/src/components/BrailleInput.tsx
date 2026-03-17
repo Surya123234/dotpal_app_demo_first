@@ -52,7 +52,10 @@ export default function BrailleInput({
       setDotsPressed([...dotsPressed, dot]);
     }
     // Play button select sound
-    const audio = new Audio("/audios/button_select.mp3");
+    const audioUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/button_select.mp3").data.publicUrl;
+    const audio = new Audio(audioUrl);
     audio.play().catch(() => {
       /* ignore play errors (autoplay policy, etc.) */
     });
