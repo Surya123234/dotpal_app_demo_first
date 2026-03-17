@@ -336,10 +336,14 @@ export default function BrailleApp() {
   const handleModeSelect = (newMode: Mode) => {
     // If currently in a flow, require reset first
     if (mode && selectedLetter && !waitingForReset) {
-      playResetAudio();
+      const audioData = supabase.storage
+        .from("media")
+        .getPublicUrl(`audio/reset_dots.mp3`);
+      const audio = new Audio(audioData.data.publicUrl);
+      resetAudioRef.current = audio;
       setWaitingForReset(true);
-      // Store the pending mode change
-      setTimeout(() => {
+      // Switch mode only after reset audio finishes to prevent overlap with select_letter
+      audio.onended = () => {
         setMode(newMode);
         setSelectedLetter(null);
         setDotsPressed([]);
@@ -347,7 +351,10 @@ export default function BrailleApp() {
         setShowInterimScreen(false);
         setWaitingForReset(false);
         setPendingLetterSelection(null);
-      }, 1000);
+      };
+      audio.play().catch(() => {
+        /* ignore play errors */
+      });
       return;
     }
 
@@ -357,6 +364,27 @@ export default function BrailleApp() {
     setShowInterimScreen(false);
     setMode(newMode);
   };
+
+  // Play welcome audio sequence on first load: select_game → reset_dots
+  useEffect(() => {
+    const selectGameUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/select_game.mp3").data.publicUrl;
+    const resetDotsUrl = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/reset_dots.mp3").data.publicUrl;
+
+    const selectGameAudio = new Audio(selectGameUrl);
+    selectGameAudio.onended = () => {
+      const resetAudio = new Audio(resetDotsUrl);
+      resetAudio.play().catch(() => {
+        /* ignore play errors */
+      });
+    };
+    selectGameAudio.play().catch(() => {
+      /* ignore play errors */
+    });
+  }, []);
 
   // Initialize driver on mount and auto-connect; keep connection until unplugged
   useEffect(() => {
