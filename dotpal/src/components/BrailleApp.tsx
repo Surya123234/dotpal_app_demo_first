@@ -31,6 +31,7 @@ export default function BrailleApp() {
   const resetAudioRef = useRef<HTMLAudioElement | null>(null);
   const interimAudioRef = useRef<HTMLAudioElement | null>(null);
   const pendingModeRef = useRef<Mode | null>(null);
+  const startupSelectGameAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Ref to store current state for use in the input handler
   const stateRef = useRef({
@@ -96,6 +97,16 @@ export default function BrailleApp() {
       resetAudioRef.current.currentTime = 0;
       resetAudioRef.current = null;
     }
+  };
+
+  const stopStartupAudio = () => {
+    if (startupSelectGameAudioRef.current) {
+      startupSelectGameAudioRef.current.onended = null;
+      startupSelectGameAudioRef.current.pause();
+      startupSelectGameAudioRef.current.currentTime = 0;
+      startupSelectGameAudioRef.current = null;
+    }
+    stopResetAudio();
   };
 
   const checkDotsReset = (currentDotsPressed: BrailleDot[]) => {
@@ -348,6 +359,11 @@ export default function BrailleApp() {
   };
 
   const handleModeSelect = (newMode: Mode) => {
+    // On initial load, stop startup audio so mode-change prompts do not overlap.
+    if (!mode && !selectedLetter) {
+      stopStartupAudio();
+    }
+
     // If currently in a flow, require reset first
     if (mode && selectedLetter && !waitingForReset) {
       // Stop any interim audio that may be playing
@@ -372,7 +388,7 @@ export default function BrailleApp() {
         switchMode();
       } else {
         // Dots are raised — play reset audio, then switch mode after it ends
-          pendingModeRef.current = newMode;
+        pendingModeRef.current = newMode;
         const audioData = supabase.storage
           .from("media")
           .getPublicUrl(`audio/reset_dots.mp3`);
@@ -410,8 +426,18 @@ export default function BrailleApp() {
       .getPublicUrl("audio/reset_dots.mp3").data.publicUrl;
 
     const selectGameAudio = new Audio(selectGameUrl);
+    startupSelectGameAudioRef.current = selectGameAudio;
     selectGameAudio.onended = () => {
+      startupSelectGameAudioRef.current = null;
+      // If user already picked a mode, skip startup reset prompt.
+      if (stateRef.current.mode) return;
       const resetAudio = new Audio(resetDotsUrl);
+      resetAudioRef.current = resetAudio;
+      resetAudio.onended = () => {
+        if (resetAudioRef.current === resetAudio) {
+          resetAudioRef.current = null;
+        }
+      };
       resetAudio.play().catch(() => {
         /* ignore play errors */
       });
@@ -419,6 +445,10 @@ export default function BrailleApp() {
     selectGameAudio.play().catch(() => {
       /* ignore play errors */
     });
+
+    return () => {
+      stopStartupAudio();
+    };
   }, []);
 
   // Initialize driver on mount and auto-connect; keep connection until unplugged

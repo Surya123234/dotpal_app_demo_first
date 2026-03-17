@@ -4,6 +4,8 @@ import BrailleCell from "./BrailleCell";
 import { boxStyles, buttonStyles, typography, spacing } from "../styles/theme";
 import { supabase } from "../supabase";
 
+let activeEnterBrailleAudio: HTMLAudioElement | null = null;
+
 interface Props {
   selectedLetter: string;
   dotsPressed: BrailleDot[];
@@ -20,13 +22,27 @@ export default function BrailleInput({
   onBack,
 }: Props) {
   useEffect(() => {
+    if (activeEnterBrailleAudio) {
+      activeEnterBrailleAudio.pause();
+      activeEnterBrailleAudio.currentTime = 0;
+    }
+
     const url = supabase.storage
       .from("media")
       .getPublicUrl("audio/enter_braille.mp3").data.publicUrl;
     const audio = new Audio(url);
+    activeEnterBrailleAudio = audio;
     audio.play().catch(() => {
       /* ignore play errors */
     });
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      if (activeEnterBrailleAudio === audio) {
+        activeEnterBrailleAudio = null;
+      }
+    };
   }, []);
 
   const toggleDot = (dot: BrailleDot) => {
