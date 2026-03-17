@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { type BrailleDot } from "../braille";
 import BrailleCell from "./BrailleCell";
 import { boxStyles, buttonStyles, typography, spacing } from "../styles/theme";
+import { supabase } from "../supabase";
 
 interface Props {
   selectedLetter: string;
@@ -17,6 +19,16 @@ export default function BrailleInput({
   onSubmit,
   onBack,
 }: Props) {
+  useEffect(() => {
+    const url = supabase.storage
+      .from("media")
+      .getPublicUrl("audio/enter_braille.mp3").data.publicUrl;
+    const audio = new Audio(url);
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
+  }, []);
+
   const toggleDot = (dot: BrailleDot) => {
     if (dotsPressed.includes(dot)) {
       setDotsPressed(dotsPressed.filter((d) => d !== dot));

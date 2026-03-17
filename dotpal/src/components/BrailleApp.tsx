@@ -29,6 +29,7 @@ export default function BrailleApp() {
   >(null);
   const driverRef = useRef<ArduinoDriver | null>(null);
   const resetAudioRef = useRef<HTMLAudioElement | null>(null);
+  const interimAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Ref to store current state for use in the input handler
   const stateRef = useRef({
@@ -336,14 +337,14 @@ export default function BrailleApp() {
   const handleModeSelect = (newMode: Mode) => {
     // If currently in a flow, require reset first
     if (mode && selectedLetter && !waitingForReset) {
-      const audioData = supabase.storage
-        .from("media")
-        .getPublicUrl(`audio/reset_dots.mp3`);
-      const audio = new Audio(audioData.data.publicUrl);
-      resetAudioRef.current = audio;
-      setWaitingForReset(true);
-      // Switch mode only after reset audio finishes to prevent overlap with select_letter
-      audio.onended = () => {
+      // Stop any interim audio that may be playing
+      if (interimAudioRef.current) {
+        interimAudioRef.current.pause();
+        interimAudioRef.current.currentTime = 0;
+        interimAudioRef.current = null;
+      }
+
+      const switchMode = () => {
         setMode(newMode);
         setSelectedLetter(null);
         setDotsPressed([]);
@@ -352,9 +353,23 @@ export default function BrailleApp() {
         setWaitingForReset(false);
         setPendingLetterSelection(null);
       };
-      audio.play().catch(() => {
-        /* ignore play errors */
-      });
+
+      if (checkDotsReset(dotsPressed)) {
+        // Dots already clear — switch immediately, no reset audio needed
+        switchMode();
+      } else {
+        // Dots are raised — play reset audio, then switch mode after it ends
+        const audioData = supabase.storage
+          .from("media")
+          .getPublicUrl(`audio/reset_dots.mp3`);
+        const audio = new Audio(audioData.data.publicUrl);
+        resetAudioRef.current = audio;
+        setWaitingForReset(true);
+        audio.onended = switchMode;
+        audio.play().catch(() => {
+          /* ignore play errors */
+        });
+      }
       return;
     }
 
@@ -623,6 +638,9 @@ export default function BrailleApp() {
               mode={mode}
               selectedLetter={selectedLetter}
               onAudioEnd={() => setShowInterimScreen(false)}
+              onAudioStart={(audio) => {
+                interimAudioRef.current = audio;
+              }}
             />
           )}
 

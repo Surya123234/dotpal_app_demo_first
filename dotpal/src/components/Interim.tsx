@@ -8,9 +8,15 @@ interface Props {
   mode: "letter" | "word" | "dot";
   selectedLetter: string;
   onAudioEnd?: () => void;
+  onAudioStart?: (audio: HTMLAudioElement) => void;
 }
 
-export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
+export default function Interim({
+  mode,
+  selectedLetter,
+  onAudioEnd,
+  onAudioStart,
+}: Props) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>("");
 
@@ -20,6 +26,7 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
       .from("media")
       .getPublicUrl(`audio/${mode}_mode_${selectedLetter.toLowerCase()}.mp3`);
     const audio = new Audio(audioData.data.publicUrl);
+    onAudioStart?.(audio);
     audio.addEventListener("ended", () => {
       onAudioEnd?.();
     });
@@ -31,7 +38,7 @@ export default function Interim({ mode, selectedLetter, onAudioEnd }: Props) {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, [selectedLetter, mode, onAudioEnd]);
+  }, [selectedLetter, mode, onAudioEnd, onAudioStart]);
 
   // Preload image for word mode
   useEffect(() => {
