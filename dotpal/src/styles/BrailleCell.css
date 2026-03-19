@@ -63,7 +63,7 @@
 }
 
 .dot-number {
-  font-size: 1.05rem;
+  font-size: 2rem;
   font-weight: 900;
   color: #000000;
 }
@@ -101,6 +101,6 @@
   }
 
   .dot-number {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
   }
 }
